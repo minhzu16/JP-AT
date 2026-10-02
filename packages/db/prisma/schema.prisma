@@ -1,0 +1,383 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CANDIDATE
+  RECRUITER
+  ADMIN
+}
+
+enum MemberRole {
+  ADMIN
+  RECRUITER
+}
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum WorkMode {
+  ONSITE
+  REMOTE
+  HYBRID
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum JobLevel {
+  INTERN
+  FRESHER
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  MANAGER
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SCREENING
+  INTERVIEW
+  OFFER
+  HIRED
+  REJECTED
+  WITHDRAWN
+}
+
+enum DocumentKind {
+  RESUME
+  COVER_LETTER
+  CERT
+}
+
+enum ScanStatus {
+  PENDING
+  CLEAN
+  INFECTED
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  DONE
+  CANCELLED
+  NO_SHOW
+}
+
+enum InterviewMode {
+  ONLINE
+  ONSITE
+}
+
+model User {
+  id              String            @id @default(uuid()) @db.Uuid
+  email           String            @unique
+  passwordHash    String
+  role            Role              @default(CANDIDATE)
+  emailVerifiedAt DateTime?
+  status          String            @default("ACTIVE")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  candidateProfile CandidateProfile?
+  companyMembers   CompanyMember[]
+  createdJobs      Job[]             @relation("JobCreator")
+  notifications    Notification[]
+  auditLogs        AuditLog[]        @relation("ActorAudit")
+  consents         Consent[]
+  statusChanges    ApplicationStatusHistory[] @relation("StatusChanger")
+  applicationNotes ApplicationNote[] @relation("NoteAuthor")
+
+  @@map("users")
+}
+
+model CandidateProfile {
+  id              String            @id @default(uuid()) @db.Uuid
+  userId          String            @unique @db.Uuid
+  fullName        String
+  headline        String?
+  summary         String?           @db.Text
+  location        String?
+  yearsExperience Int               @default(0)
+  visibility      Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills          CandidateSkill[]
+  documents       Document[]
+  savedJobs       SavedJob[]
+  applications    Application[]
+
+  @@map("candidate_profiles")
+}
+
+model Company {
+  id          String          @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String          @unique
+  website     String?
+  description String?         @db.Text
+  logoKey     String?
+  verifiedAt  DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  members     CompanyMember[]
+  jobs        Job[]
+
+  @@map("companies")
+}
+
+model CompanyMember {
+  companyId  String     @db.Uuid
+  userId     String     @db.Uuid
+  memberRole MemberRole @default(RECRUITER)
+  createdAt  DateTime   @default(now())
+
+  company    Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([companyId, userId])
+  @@map("company_members")
+}
+
+model Job {
+  id             String          @id @default(uuid()) @db.Uuid
+  companyId      String          @db.Uuid
+  createdById    String          @db.Uuid
+  title          String
+  description    String          @db.Text
+  location       String
+  workMode       WorkMode        @default(ONSITE)
+  employmentType EmploymentType  @default(FULL_TIME)
+  level          JobLevel        @default(MID)
+  salaryMin      Int?
+  salaryMax      Int?
+  currency       String          @default("VND")
+  status         JobStatus       @default(DRAFT)
+  publishedAt    DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy      User            @relation("JobCreator", fields: [createdById], references: [id])
+  skills         JobSkill[]
+  applications   Application[]
+  savedBy        SavedJob[]
+
+  @@index([companyId, status])
+  @@index([status, publishedAt])
+  @@map("jobs")
+}
+
+model Skill {
+  id              String           @id @default(uuid()) @db.Uuid
+  name            String           @unique
+  slug            String           @unique
+  category        String?
+  jobSkills       JobSkill[]
+  candidateSkills CandidateSkill[]
+
+  @@map("skills")
+}
+
+model JobSkill {
+  jobId      String   @db.Uuid
+  skillId    String   @db.Uuid
+  isRequired Boolean  @default(true)
+  weight     Int      @default(3)
+
+  job        Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, skillId])
+  @@map("job_skills")
+}
+
+model CandidateSkill {
+  candidateId String           @db.Uuid
+  skillId     String           @db.Uuid
+  level       Int              @default(3)
+  years       Float            @default(1.0)
+
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  skill       Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([candidateId, skillId])
+  @@map("candidate_skills")
+}
+
+model Document {
+  id               String           @id @default(uuid()) @db.Uuid
+  ownerId          String           @db.Uuid
+  kind             DocumentKind     @default(RESUME)
+  originalFilename String
+  mimeType         String
+  sizeBytes        Int
+  sha256           String?
+  storageKey       String
+  pageCount        Int              @default(1)
+  scanStatus       ScanStatus       @default(CLEAN)
+  parsedText       String?          @db.Text
+  isDefault        Boolean          @default(false)
+  version          Int              @default(1)
+  uploadedAt       DateTime         @default(now())
+  deletedAt        DateTime?
+
+  owner            CandidateProfile @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  applications     Application[]
+
+  @@map("documents")
+}
+
+model SavedJob {
+  candidateId String           @db.Uuid
+  jobId       String           @db.Uuid
+  savedAt     DateTime         @default(now())
+
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  job         Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@id([candidateId, jobId])
+  @@map("saved_jobs")
+}
+
+model Application {
+  id               String            @id @default(uuid()) @db.Uuid
+  jobId            String            @db.Uuid
+  candidateId      String            @db.Uuid
+  resumeDocumentId String?           @db.Uuid
+  coverLetter      String?           @db.Text
+  status           ApplicationStatus @default(APPLIED)
+  appliedAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  job              Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidate        CandidateProfile  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  resume           Document?         @relation(fields: [resumeDocumentId], references: [id], onDelete: SetNull)
+  history          ApplicationStatusHistory[]
+  notes            ApplicationNote[]
+  interviews       Interview[]
+  matchScore       MatchScore?
+
+  @@unique([jobId, candidateId]) // Enforces: One candidate cannot apply multiple times to the same job
+  @@index([jobId, status, appliedAt])
+  @@map("applications")
+}
+
+model ApplicationStatusHistory {
+  id            String            @id @default(uuid()) @db.Uuid
+  applicationId String            @db.Uuid
+  fromStatus    ApplicationStatus
+  toStatus      ApplicationStatus
+  changedById   String            @db.Uuid
+  reason        String?
+  changedAt     DateTime          @default(now())
+
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  changedBy     User              @relation("StatusChanger", fields: [changedById], references: [id])
+
+  @@map("application_status_history")
+}
+
+model ApplicationNote {
+  id            String      @id @default(uuid()) @db.Uuid
+  applicationId String      @db.Uuid
+  authorId      String      @db.Uuid
+  body          String      @db.Text
+  createdAt     DateTime    @default(now())
+
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  author        User        @relation("NoteAuthor", fields: [authorId], references: [id])
+
+  @@map("application_notes")
+}
+
+model Interview {
+  id               String          @id @default(uuid()) @db.Uuid
+  applicationId    String          @db.Uuid
+  round            Int             @default(1)
+  scheduledAt      DateTime
+  durationMin      Int             @default(60)
+  mode             InterviewMode   @default(ONLINE)
+  locationOrLink   String
+  interviewerNames String?
+  status           InterviewStatus @default(SCHEDULED)
+  feedback         String?         @db.Text
+  outcome          String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  application      Application     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("interviews")
+}
+
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  type      String
+  title     String
+  message   String    @db.Text
+  payload   String?   @db.Text
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model MatchScore {
+  id            String      @id @default(uuid()) @db.Uuid
+  applicationId String      @unique @db.Uuid
+  score         Int
+  breakdown     String      @db.Text // JSON string of MatchScoreBreakdown
+  modelVersion  String      @default("deterministic-v1.0")
+  createdAt     DateTime    @default(now())
+
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("match_scores")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  actorId   String?  @db.Uuid
+  action    String
+  entity    String
+  entityId  String
+  metadata  String?  @db.Text
+  ip        String?
+  createdAt DateTime @default(now())
+
+  actor     User?    @relation("ActorAudit", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+model Consent {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  purpose   String
+  grantedAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("consents")
+}
