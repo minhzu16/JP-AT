@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+        env:
+          # Build-time placeholders; real secrets come from the deploy env.
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/jobportal?schema=public
+          JWT_ACCESS_SECRET: ci-placeholder-access
+          JWT_REFRESH_SECRET: ci-placeholder-refresh
+
+      - name: Test
+        run: pnpm test

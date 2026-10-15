@@ -114,74 +114,74 @@ export function RecruiterJobsView({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 rounded-3xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface shadow-sm">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Quản lý tin tuyển dụng
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">
+            Quản lý Vị trí Tuyển dụng Doanh nghiệp
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
-            Đăng tin tuyển dụng mới, quản lý trạng thái hiển thị và theo dõi số lượng hồ sơ.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Đăng tin tuyển dụng kỹ thuật, thiết lập ma trận trọng số kỹ năng và điều phối hồ sơ.
           </p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-5 py-2.5 text-xs font-bold rounded-2xl bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/25 flex items-center space-x-1.5 transition self-start sm:self-auto"
+          className="px-4 py-2 text-xs font-medium rounded-lg bg-cobalt-600 hover:bg-cobalt-700 text-white shadow-sm flex items-center space-x-1.5 transition self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Đăng tin tuyển dụng mới</span>
         </button>
       </div>
 
       {/* Jobs List */}
       {loading ? (
-        <div className="py-16 text-center text-xs text-slate-400">Đang tải tin tuyển dụng...</div>
+        <div className="py-16 text-center text-xs text-slate-400">Đang tải danh sách vị trí...</div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {jobs.map((job) => (
             <div
               key={job.id}
-              className="glass-card rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4"
+              className="rounded-xl p-5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
               <div className="space-y-2">
                 <div className="flex items-center space-x-2.5">
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
                     {job.title}
                   </h3>
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                    className={`px-2 py-0.5 rounded font-mono text-[10px] font-medium ${
                       job.status === 'PUBLISHED'
-                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                        : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/50'
+                        : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200/50'
                     }`}
                   >
                     {job.status}
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400 font-medium">
                   <span className="flex items-center">
-                    <MapPin className="w-3.5 h-3.5 mr-1" />
+                    <MapPin className="w-3.5 h-3.5 mr-1 text-slate-400" />
                     {job.location} ({job.workMode})
                   </span>
                   <span>•</span>
-                  <span className="text-emerald-600 font-bold">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-mono tabular-nums">
                     {formatSalary(job.salaryMin, job.salaryMax)}
                   </span>
                   <span>•</span>
-                  <span className="font-semibold text-brand-600 flex items-center">
+                  <span className="font-medium text-cobalt-600 dark:text-cobalt-400 flex items-center">
                     <Users className="w-3.5 h-3.5 mr-1" />
                     {job._count?.applications || 0} hồ sơ ứng tuyển
                   </span>
                 </div>
 
-                <div className="flex flex-wrap gap-1.5 pt-1">
+                <div className="flex flex-wrap gap-1 pt-1">
                   {job.skills?.map((s: any) => (
                     <span
                       key={s.skill.id}
-                      className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                      className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-obsidian-card text-slate-600 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800"
                     >
                       {s.skill.name} {s.isRequired ? '(Bắt buộc)' : ''}
                     </span>
@@ -193,7 +193,7 @@ export function RecruiterJobsView({
                 {onSelectJobForATS && (
                   <button
                     onClick={() => onSelectJobForATS(job.id)}
-                    className="px-3.5 py-2 text-xs font-bold rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 hover:bg-brand-100 transition"
+                    className="px-3 py-1.5 text-xs font-medium rounded-lg bg-cobalt-50 text-cobalt-700 dark:bg-cobalt-950/60 dark:text-cobalt-300 hover:bg-cobalt-100 transition border border-cobalt-200/50"
                   >
                     Xem Kanban đơn ({job._count?.applications || 0})
                   </button>
@@ -201,10 +201,10 @@ export function RecruiterJobsView({
 
                 <button
                   onClick={() => handleTogglePublish(job)}
-                  className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition ${
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
                     job.status === 'PUBLISHED'
-                      ? 'border-rose-200 text-rose-600 hover:bg-rose-50'
-                      : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
+                      ? 'border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30'
+                      : 'border-emerald-200 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
                   }`}
                 >
                   {job.status === 'PUBLISHED' ? 'Đóng tin' : 'Mở lại tin'}

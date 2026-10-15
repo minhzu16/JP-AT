@@ -136,28 +136,28 @@ export function JobDetailModal({
         {/* Content Body */}
         <div className="p-6 max-h-[65vh] overflow-y-auto space-y-6">
           {/* Quick Highlight Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-              <span className="text-[11px] font-medium text-slate-400 uppercase">Mức lương</span>
-              <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-100 dark:border-slate-800">
+              <span className="text-[11px] text-slate-400 block">Mức lương dự kiến</span>
+              <div className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 tabular-nums">
                 {formatSalary(job.salaryMin, job.salaryMax)}
               </div>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-              <span className="text-[11px] font-medium text-slate-400 uppercase">Hình thức</span>
-              <div className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-100 dark:border-slate-800">
+              <span className="text-[11px] text-slate-400 block">Hình thức làm việc</span>
+              <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                 {job.workMode}
               </div>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-              <span className="text-[11px] font-medium text-slate-400 uppercase">Cấp bậc</span>
-              <div className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-100 dark:border-slate-800">
+              <span className="text-[11px] text-slate-400 block">Cấp bậc</span>
+              <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                 {job.level}
               </div>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-              <span className="text-[11px] font-medium text-slate-400 uppercase">Loại hợp đồng</span>
-              <div className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-100 dark:border-slate-800">
+              <span className="text-[11px] text-slate-400 block">Loại hợp đồng</span>
+              <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-0.5">
                 {job.employmentType}
               </div>
             </div>
@@ -165,25 +165,25 @@ export function JobDetailModal({
 
           {/* Required Skills */}
           <div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2.5">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">
               Kỹ năng yêu cầu
             </h4>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {job.skills.map((s) => (
                 <div
                   key={s.skill.id}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center space-x-1.5 ${
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium flex items-center space-x-1.5 ${
                     s.isRequired
-                      ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800'
+                      ? 'bg-cobalt-50 dark:bg-cobalt-950/60 text-cobalt-700 dark:text-cobalt-300 border border-cobalt-200 dark:border-cobalt-800'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                   }`}
                 >
                   <span>{s.skill.name}</span>
-                  <span className="text-[10px] px-1 rounded bg-black/10 dark:bg-white/10">
-                    Trọng số: {s.weight}
+                  <span className="text-[10px] font-mono px-1 rounded bg-black/5 dark:bg-white/10">
+                    w:{s.weight}
                   </span>
                   {s.isRequired && (
-                    <span className="text-[10px] text-brand-600 dark:text-brand-400 font-bold">
+                    <span className="text-[10px] text-cobalt-600 dark:text-cobalt-400 font-bold">
                       (Bắt buộc)
                     </span>
                   )}
@@ -194,27 +194,27 @@ export function JobDetailModal({
 
           {/* Job Description */}
           <div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">
-              Mô tả công việc & Quyền lợi
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">
+              Mô tả công việc & Yêu cầu chi tiết
             </h4>
-            <div className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-line leading-relaxed bg-slate-50/50 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+            <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 whitespace-pre-line leading-relaxed bg-slate-50/50 dark:bg-obsidian-card p-4 rounded-xl border border-slate-100 dark:border-slate-800">
               {job.description}
             </div>
           </div>
 
-          {/* AI Matching Banner */}
+          {/* AI Matching Diagnostic Box */}
           {user?.role === 'CANDIDATE' && (
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200/80 dark:border-amber-800/60 flex items-center justify-between">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-xl bg-amber-500 text-white">
-                  <Sparkles className="w-5 h-5" />
+                <div className="p-2 rounded-lg bg-cobalt-600 text-white">
+                  <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">
                     Kiểm tra độ tương thích kỹ năng với AI
                   </div>
-                  <div className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
-                    Hệ thống đánh giá độ khớp kỹ năng & gợi ý nâng cấp CV (Không thiên lệch)
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Hệ thống đánh giá độ khớp theo mô hình STAR, loại trừ thiên lệch.
                   </div>
                 </div>
               </div>
@@ -223,7 +223,7 @@ export function JobDetailModal({
                   onClose();
                   onOpenAiMatch(job);
                 }}
-                className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition"
+                className="px-3 py-1.5 text-xs font-medium rounded-lg bg-cobalt-600 hover:bg-cobalt-700 text-white shadow-sm transition"
               >
                 So khớp ngay
               </button>

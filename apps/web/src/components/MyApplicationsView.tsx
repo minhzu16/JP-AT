@@ -45,60 +45,60 @@ export function MyApplicationsView() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="glass-panel p-6 rounded-3xl">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-          Đơn ứng tuyển của tôi
+    <div className="space-y-5">
+      <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
+          Tiến trình hồ sơ ứng tuyển của tôi
         </h2>
-        <p className="text-xs text-slate-500 mt-1">
-          Theo dõi tiến độ xét duyệt hồ sơ, lịch phỏng vấn và trạng thái ứng tuyển của bạn.
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          Theo dõi minh bạch lịch phỏng vấn và các bước chuyển trạng thái hồ sơ trực tiếp từ ATS doanh nghiệp.
         </p>
       </div>
 
       {loading ? (
-        <div className="py-16 text-center text-xs text-slate-400">Đang tải danh sách đơn...</div>
+        <div className="py-16 text-center text-xs text-slate-400">Đang tải danh sách hồ sơ...</div>
       ) : applications.length === 0 ? (
-        <div className="glass-panel p-12 text-center rounded-3xl">
-          <FileText className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">
+        <div className="p-12 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface text-center">
+          <FileText className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
             Bạn chưa nộp đơn vào vị trí nào
           </h3>
           <p className="text-xs text-slate-400 mt-1">
-            Khám phá các tin tuyển dụng hấp dẫn ở tab "Tìm việc làm" và gửi hồ sơ ngay!
+            Khám phá các vị trí kỹ thuật đang tuyển dụng và gửi hồ sơ trực tiếp.
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           {applications.map((app) => (
             <div
               key={app.id}
-              className="glass-card rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 space-y-4"
+              className="rounded-xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface space-y-3.5"
             >
               {/* Job info header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center space-x-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                    <Building className="w-6 h-6 text-slate-400" />
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+                    <Building className="w-5 h-5 text-slate-400" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
                       {app.job.title}
                     </h3>
-                    <p className="text-xs text-slate-500 font-medium">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                       {app.job.company.name} • {app.job.location}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <span className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200 dark:border-brand-800">
-                    Trạng thái: {app.status}
+                  <span className="px-2.5 py-1 rounded-md text-xs font-mono font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                    {app.status}
                   </span>
 
                   {app.status !== 'WITHDRAWN' && app.status !== 'HIRED' && app.status !== 'REJECTED' && (
                     <button
                       onClick={() => handleWithdraw(app.id)}
-                      className="px-3 py-1.5 text-xs font-semibold rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition border border-rose-200 dark:border-rose-900"
+                      className="px-2.5 py-1 text-xs font-medium rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition border border-rose-200 dark:border-rose-900"
                     >
                       Rút đơn
                     </button>

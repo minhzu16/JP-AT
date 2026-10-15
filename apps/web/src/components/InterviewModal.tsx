@@ -63,21 +63,24 @@ export function InterviewModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+      <div className="bg-white dark:bg-obsidian-surface border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-obsidian-card">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center">
-              <Calendar className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-cobalt-600 text-white flex items-center justify-center">
+              <Calendar className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Lên lịch phỏng vấn
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                Lên lịch phỏng vấn kỹ thuật
               </h3>
-              <p className="text-xs text-slate-500">Ứng viên: {candidateName}</p>
+              <p className="text-xs text-slate-500 font-mono">Ứng viên: {candidateName}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-xl">
-            <X className="w-5 h-5" />
+          <button
+            onClick={onClose}
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800 transition"
+          >
+            <X className="w-4 h-4" />
           </button>
         </div>
 

@@ -12,3 +12,8 @@ coverage
 .turbo
 *.tsbuildinfo
 uploads/
+
+# Local dev / tooling artifacts
+.agents/
+test-db.js
+**/test-db.js

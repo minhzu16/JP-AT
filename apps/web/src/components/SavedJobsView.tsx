@@ -35,26 +35,26 @@ export function SavedJobsView({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="glass-panel p-6 rounded-3xl">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-          Công việc đã lưu
+    <div className="space-y-5">
+      <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
+          Vị trí kỹ thuật đã lưu
         </h2>
-        <p className="text-xs text-slate-500 mt-1">
-          Lưu lại các vị trí phù hợp để xem xét và nộp đơn ứng tuyển khi sẵn sàng.
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          Danh mục các công việc đang quan tâm và chuẩn bị hồ sơ ứng tuyển.
         </p>
       </div>
 
       {loading ? (
-        <div className="py-16 text-center text-xs text-slate-400">Đang tải việc đã lưu...</div>
+        <div className="py-16 text-center text-xs text-slate-400">Đang tải danh sách việc đã lưu...</div>
       ) : saved.length === 0 ? (
-        <div className="glass-panel p-12 text-center rounded-3xl">
-          <Bookmark className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-700 dark:text-slate-300">
+        <div className="p-12 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface text-center">
+          <Bookmark className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+          <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
             Chưa có công việc nào được lưu
           </h3>
           <p className="text-xs text-slate-400 mt-1">
-            Nhấn vào biểu tượng bookmark trên các tin tuyển dụng để lưu vào danh sách này.
+            Nhấn vào biểu tượng bookmark trên tin tuyển dụng để ghim vào danh sách theo dõi.
           </p>
         </div>
       ) : (
@@ -62,22 +62,22 @@ export function SavedJobsView({
           {saved.map((item) => (
             <div
               key={item.jobId}
-              className="glass-card rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between"
+              className="rounded-xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
                       <Building className="w-5 h-5 text-slate-400" />
                     </div>
                     <div>
                       <h4
                         onClick={() => onSelectJob(item.job)}
-                        className="text-sm font-bold text-slate-900 dark:text-white hover:text-brand-600 cursor-pointer"
+                        className="text-sm font-semibold text-slate-900 dark:text-white hover:text-cobalt-600 dark:hover:text-cobalt-400 cursor-pointer transition-colors"
                       >
                         {item.job.title}
                       </h4>
-                      <p className="text-xs text-slate-500">{item.job.company.name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{item.job.company.name}</p>
                     </div>
                   </div>
 
@@ -90,25 +90,25 @@ export function SavedJobsView({
                   </button>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
-                  <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
+                <div className="mt-3.5 flex flex-wrap gap-1.5 text-xs">
+                  <span className="px-2 py-0.5 rounded-md font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 tabular-nums font-medium">
                     {formatSalary(item.job.salaryMin, item.job.salaryMax)}
                   </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  <span className="px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 font-medium">
                     {item.job.location}
                   </span>
-                  <span className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300">
+                  <span className="px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 font-medium">
                     {item.job.level}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
                 <button
                   onClick={() => onSelectJob(item.job)}
-                  className="px-4 py-2 text-xs font-bold rounded-xl bg-brand-600 hover:bg-brand-700 text-white transition shadow-sm"
+                  className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-cobalt-600 hover:bg-cobalt-700 text-white transition shadow-sm"
                 >
-                  Xem & Ứng tuyển ngay
+                  Xem chi tiết & Nộp đơn
                 </button>
               </div>
             </div>

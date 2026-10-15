@@ -4,33 +4,69 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --bg-base: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-subtle: #F1F5F9;
+    --border-color: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
   }
 
   .dark {
-    --background: 222 47% 7%;
-    --foreground: 210 40% 98%;
+    --bg-base: #0A0E17;
+    --bg-surface: #111827;
+    --bg-subtle: #162032;
+    --border-color: #1F293D;
+    --border-strong: #334155;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 antialiased selection:bg-brand-500 selection:text-white dark:bg-slate-950 dark:text-slate-100;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-.glass-panel {
-  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 shadow-sm;
+/* Numeric & Data Typography */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
-.glass-card {
-  @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-200;
+/* Precision Surfaces */
+.surface-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
 }
 
-/* Custom scrollbar */
+.surface-card-interactive {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+}
+
+.surface-card-interactive:hover {
+  border-color: var(--border-strong);
+}
+
+.surface-subtle {
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+}
+
+/* Precision Scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -38,9 +74,18 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400 dark:bg-slate-600;
+  background: #94A3B8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }

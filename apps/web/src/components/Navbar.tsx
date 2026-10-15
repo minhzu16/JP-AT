@@ -34,23 +34,23 @@ export function Navbar({ activeTab, setActiveTab }: { activeTab: string; setActi
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-200 dark:border-slate-800">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-obsidian-surface/95 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo */}
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-7">
           <div
             onClick={() => setActiveTab('jobs')}
-            className="flex items-center space-x-2.5 cursor-pointer group"
+            className="flex items-center space-x-3 cursor-pointer group select-none"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-brand-500/25 group-hover:scale-105 transition-transform">
-              <Briefcase className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-mono font-black text-sm tracking-tighter border border-slate-700/50 shadow-sm transition-transform group-hover:scale-105">
+              CV
             </div>
-            <div>
-              <span className="text-lg font-bold bg-gradient-to-r from-brand-600 to-indigo-600 dark:from-brand-400 dark:to-indigo-300 bg-clip-text text-transparent">
-                CareerVanguard
+            <div className="flex flex-col">
+              <span className="text-sm font-bold tracking-tight text-slate-950 dark:text-white uppercase font-sans">
+                Career<span className="text-cobalt-600 dark:text-cobalt-400">Vanguard</span>
               </span>
-              <span className="hidden sm:inline-block text-[11px] font-medium text-slate-500 dark:text-slate-400 ml-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800">
-                Job & ATS
+              <span className="text-[10px] font-mono tracking-wider text-slate-400 dark:text-slate-500 uppercase">
+                ATS Terminal
               </span>
             </div>
           </div>
@@ -59,57 +59,57 @@ export function Navbar({ activeTab, setActiveTab }: { activeTab: string; setActi
           <nav className="hidden md:flex items-center space-x-1">
             <button
               onClick={() => setActiveTab('jobs')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                 activeTab === 'jobs'
-                  ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300'
-                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60'
               }`}
             >
-              Tìm việc làm
+              Khám phá việc làm
             </button>
 
             {user?.role === 'CANDIDATE' && (
               <>
                 <button
                   onClick={() => setActiveTab('my-applications')}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                     activeTab === 'my-applications'
-                      ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60'
                   }`}
                 >
-                  Đơn của tôi
+                  Đơn ứng tuyển
                 </button>
                 <button
                   onClick={() => setActiveTab('saved-jobs')}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                     activeTab === 'saved-jobs'
-                      ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60'
                   }`}
                 >
-                  Job đã lưu
+                  Tin đã lưu
                 </button>
                 <button
                   onClick={() => setActiveTab('resumes')}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                     activeTab === 'resumes'
-                      ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60'
                   }`}
                 >
-                  Hồ sơ & CV
+                  Hồ sơ kỹ thuật
                 </button>
                 <button
                   onClick={() => setActiveTab('ai-matching')}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center space-x-1 transition-colors ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center space-x-1.5 transition-all ${
                     activeTab === 'ai-matching'
-                      ? 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-800 dark:from-amber-950/40 dark:to-orange-950/40 dark:text-amber-300'
-                      : 'text-amber-600 hover:text-amber-700 dark:text-amber-400'
+                      ? 'bg-cobalt-600 text-white shadow-sm'
+                      : 'text-cobalt-600 hover:bg-cobalt-50 dark:text-cobalt-400 dark:hover:bg-cobalt-950/40'
                   }`}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>AI Matching</span>
+                  <span>So khớp kỹ năng</span>
                 </button>
               </>
             )}
@@ -118,21 +118,21 @@ export function Navbar({ activeTab, setActiveTab }: { activeTab: string; setActi
               <>
                 <button
                   onClick={() => setActiveTab('ats-pipeline')}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center space-x-1.5 ${
                     activeTab === 'ats-pipeline'
-                      ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60'
                   }`}
                 >
-                  <LayoutDashboard className="w-4 h-4" />
-                  <span>ATS Pipeline (Kanban)</span>
+                  <LayoutDashboard className="w-3.5 h-3.5" />
+                  <span>ATS Pipeline</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('recruiter-jobs')}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                     activeTab === 'recruiter-jobs'
-                      ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60'
                   }`}
                 >
                   Quản lý tin đăng
@@ -143,13 +143,13 @@ export function Navbar({ activeTab, setActiveTab }: { activeTab: string; setActi
             {user?.role === 'ADMIN' && (
               <button
                 onClick={() => setActiveTab('admin-dashboard')}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 ${
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center space-x-1.5 ${
                   activeTab === 'admin-dashboard'
-                    ? 'bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/60'
                 }`}
               >
-                <ShieldCheck className="w-4 h-4" />
+                <ShieldCheck className="w-3.5 h-3.5" />
                 <span>Admin & Audit</span>
               </button>
             )}
