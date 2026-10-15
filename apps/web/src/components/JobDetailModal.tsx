@@ -299,7 +299,7 @@ export function JobDetailModal({
               <div>
                 <div className="text-sm font-bold">Bạn đã ứng tuyển vị trí này</div>
                 <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  Trạng thái hiện tại: <span className="font-bold underline">{appliedStatus || 'APPLIED'}</span>. Kiểm tra tab "Đơn của tôi" để theo dõi quy trình phỏng vấn.
+                  Trạng thái hiện tại: <span className="font-bold underline">{appliedStatus || 'APPLIED'}</span>. Kiểm tra tab “Đơn của tôi” để theo dõi quy trình phỏng vấn.
                 </div>
               </div>
             </div>

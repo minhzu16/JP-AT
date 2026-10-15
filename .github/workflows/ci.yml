@@ -12,8 +12,29 @@ concurrency:
 
 jobs:
   build:
-    name: Lint & Build
+    name: Lint, Build & Test
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: jobportal
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d jobportal"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/jobportal?schema=public
+      JWT_ACCESS_SECRET: ci-access-secret
+      JWT_REFRESH_SECRET: ci-refresh-secret
+      NODE_ENV: test
 
     steps:
       - name: Checkout
@@ -36,16 +57,17 @@ jobs:
       - name: Generate Prisma client
         run: pnpm db:generate
 
+      - name: Push database schema
+        run: pnpm db:push
+
+      - name: Seed database
+        run: pnpm db:seed
+
       - name: Lint
         run: pnpm lint
 
       - name: Build
         run: pnpm build
-        env:
-          # Build-time placeholders; real secrets come from the deploy env.
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/jobportal?schema=public
-          JWT_ACCESS_SECRET: ci-placeholder-access
-          JWT_REFRESH_SECRET: ci-placeholder-refresh
 
       - name: Test
         run: pnpm test

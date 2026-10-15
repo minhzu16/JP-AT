@@ -289,7 +289,7 @@ export function JobDossier({
               </label>
               {documents.length === 0 ? (
                 <div className="text-xs text-amber-600 dark:text-amber-400 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
-                  Bạn chưa có file CV trong hồ sơ. Hệ thống sẽ ghi nhận thông tin tài khoản hoặc bạn có thể vào tab "Hồ sơ kỹ thuật" để tải lên file PDF.
+                  Bạn chưa có file CV trong hồ sơ. Hệ thống sẽ ghi nhận thông tin tài khoản hoặc bạn có thể vào tab “Hồ sơ kỹ thuật” để tải lên file PDF.
                 </div>
               ) : (
                 <select

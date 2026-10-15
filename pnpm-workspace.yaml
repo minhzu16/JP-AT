@@ -10,3 +10,4 @@ allowBuilds:
   '@nestjs/core': true
   '@scarf/scarf': true
   sharp: true
+  unrs-resolver: true
