@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common';
 const request = require('supertest');
 import { AppModule } from '../src/app.module';
 import { HttpExceptionFilter } from '../src/common/http-exception.filter';
+import { PrismaService } from '../src/prisma/prisma.service';
 
 describe('Job Portal Core Requirements E2E Tests', () => {
   let app: INestApplication;
@@ -105,6 +106,13 @@ describe('Job Portal Core Requirements E2E Tests', () => {
   });
 
   it('Requirement #3: State Machine enforces valid status transitions and blocks invalid ones (422)', async () => {
+    // Ensure application starts in INTERVIEW stage for test idempotency
+    const prisma = app.get(PrismaService);
+    await prisma.application.update({
+      where: { id: vngApplicationId },
+      data: { status: 'INTERVIEW' },
+    });
+
     // Attempt invalid skip transition: e.g. INTERVIEW -> APPLIED (cannot go backwards)
     const invalidTransition = await request(app.getHttpServer())
       .post(`/api/v1/recruiter/applications/${vngApplicationId}/transition`)

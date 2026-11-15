@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Put,
+  Delete,
   Body,
   UseGuards,
   BadRequestException,
@@ -13,7 +14,7 @@ import { Roles } from '../../common/roles.decorator';
 import { CurrentUser, AuthenticatedUser } from '../../common/current-user.decorator';
 import { Role, CandidateProfileUpdateSchema, CandidateSkillsUpdateSchema } from '@jobportal/shared';
 
-@Controller('me')
+@Controller(['me', 'candidates/me'])
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CandidatesController {
   constructor(private candidatesService: CandidatesService) {}
@@ -54,5 +55,17 @@ export class CandidatesController {
       });
     }
     return this.candidatesService.updateSkills(user.userId, parsed.data);
+  }
+
+  @Get('export')
+  @Roles(Role.CANDIDATE)
+  async exportData(@CurrentUser() user: AuthenticatedUser) {
+    return this.candidatesService.exportCandidateData(user.userId);
+  }
+
+  @Delete('privacy-erasure')
+  @Roles(Role.CANDIDATE)
+  async erasePrivacyData(@CurrentUser() user: AuthenticatedUser) {
+    return this.candidatesService.eraseCandidatePrivacyData(user.userId);
   }
 }
