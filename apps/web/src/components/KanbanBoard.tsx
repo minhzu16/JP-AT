@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Users,
   Search,
@@ -38,7 +38,7 @@ export function KanbanBoard() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban');
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [jobsRes, appsRes] = await Promise.all([
@@ -52,11 +52,11 @@ export function KanbanBoard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedJobId]);
 
   useEffect(() => {
     loadData();
-  }, [selectedJobId, user]);
+  }, [loadData, user]);
 
   // Stage funnel statistics
   const totalApps = applications.length;

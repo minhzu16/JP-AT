@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   X,
   FileText,
@@ -66,7 +66,7 @@ export function ApplicantDetailDrawer({
   // Interview modal
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     if (!applicationId) return;
     setLoading(true);
     setError(null);
@@ -86,13 +86,13 @@ export function ApplicantDetailDrawer({
       .finally(() => {
         setLoading(false);
       });
-  };
+  }, [applicationId]);
 
   useEffect(() => {
     if (isOpen && applicationId) {
       loadData();
     }
-  }, [isOpen, applicationId]);
+  }, [isOpen, applicationId, loadData]);
 
   if (!isOpen || !applicationId) return null;
 

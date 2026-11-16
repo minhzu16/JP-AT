@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { fetchApi } from './api';
 
 export interface UserProfile {
@@ -77,7 +77,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchCurrentUser = async (authToken?: string) => {
+  const logout = useCallback(() => {
+    localStorage.removeItem('jobportal_token');
+    setToken(null);
+    setUser(null);
+  }, []);
+
+  const fetchCurrentUser = useCallback(async (authToken?: string) => {
     try {
       const data = await fetchApi<UserProfile>('/auth/me', {
         headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
@@ -90,20 +96,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem('jobportal_token');
-    if (savedToken) {
-      setToken(savedToken);
-      fetchCurrentUser(savedToken);
-    } else {
-      // Default to Candidate 1 for immediate demo richness if not set
-      switchDemoAccount('CANDIDATE_1');
-    }
   }, []);
 
-  const login = async (email: string, password = 'Password123!@#') => {
+  const login = useCallback(async (email: string, password = 'Password123!@#') => {
     setIsLoading(true);
     try {
       const res = await fetchApi<{ accessToken: string; user: UserProfile }>('/auth/login', {
@@ -116,15 +111,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchCurrentUser]);
 
-  const logout = () => {
-    localStorage.removeItem('jobportal_token');
-    setToken(null);
-    setUser(null);
-  };
-
-  const switchDemoAccount = async (accountKey: string) => {
+  const switchDemoAccount = useCallback(async (accountKey: string) => {
     if (accountKey === 'GUEST') {
       logout();
       return;
@@ -133,13 +122,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (acc) {
       await login(acc.email, 'Password123!@#');
     }
-  };
+  }, [login, logout]);
 
-  const refreshMe = async () => {
+  useEffect(() => {
+    const savedToken = localStorage.getItem('jobportal_token');
+    if (savedToken) {
+      setToken(savedToken);
+      fetchCurrentUser(savedToken);
+    } else {
+      switchDemoAccount('CANDIDATE_1');
+    }
+  }, [fetchCurrentUser, switchDemoAccount]);
+
+  const refreshMe = useCallback(async () => {
     if (token) {
       await fetchCurrentUser(token);
     }
-  };
+  }, [token, fetchCurrentUser]);
 
   return (
     <AuthContext.Provider

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import {
   MapPin,
   Building,
@@ -88,9 +89,12 @@ export function JobCard({
         <div className="flex items-start space-x-3 min-w-0">
           <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0 mt-0.5">
             {job.company.logoKey ? (
-              <img
+              <Image
                 src={job.company.logoKey}
                 alt={job.company.name}
+                width={40}
+                height={40}
+                unoptimized
                 className="w-full h-full object-cover"
               />
             ) : (

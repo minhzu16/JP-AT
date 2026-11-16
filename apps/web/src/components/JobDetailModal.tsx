@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import {
   X,
   Building,
@@ -99,9 +100,12 @@ export function JobDetailModal({
           <div className="flex items-center space-x-4">
             <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
               {job.company.logoKey ? (
-                <img
+                <Image
                   src={job.company.logoKey}
                   alt={job.company.name}
+                  width={56}
+                  height={56}
+                  unoptimized
                   className="w-full h-full object-cover"
                 />
               ) : (

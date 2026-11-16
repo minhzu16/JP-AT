@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from '../components/Navbar';
 import { JobCard, JobItem } from '../components/JobCard';
 import { JobDossier } from '../components/JobDossier';
@@ -60,7 +60,7 @@ export default function HomePage() {
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   // Fetch jobs and skills
-  const fetchJobs = () => {
+  const fetchJobs = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams();
     if (keyword) params.append('q', keyword);
@@ -89,11 +89,11 @@ export default function HomePage() {
         setSelectedJob(null);
       })
       .finally(() => setLoading(false));
-  };
+  }, [keyword, location, workMode, level, selectedSkillId]);
 
   useEffect(() => {
     fetchJobs();
-  }, [keyword, location, workMode, level, selectedSkillId]);
+  }, [fetchJobs]);
 
   useEffect(() => {
     fetchApi<any[]>('/skills')
@@ -102,7 +102,7 @@ export default function HomePage() {
   }, []);
 
   // Fetch candidate metadata (saved jobs and applications)
-  const refreshCandidateData = () => {
+  const refreshCandidateData = useCallback(() => {
     if (user?.role === 'CANDIDATE') {
       fetchApi<any[]>('/me/saved-jobs')
         .then((data) => {
@@ -119,11 +119,11 @@ export default function HomePage() {
       setSavedJobIds(new Set());
       setMyApplications([]);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     refreshCandidateData();
-  }, [user]);
+  }, [refreshCandidateData]);
 
   const handleToggleSave = async (jobId: string, current: boolean) => {
     try {

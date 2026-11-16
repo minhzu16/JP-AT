@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import {
   Building,
   MapPin,
@@ -66,7 +67,7 @@ export function JobDossier({
     setErrorMsg(null);
     setSuccessMsg(null);
     setShowApplyTray(false);
-  }, [job?.id, user]);
+  }, [job, user]);
 
   if (!job) {
     return (
@@ -150,9 +151,12 @@ export function JobDossier({
           <div className="flex items-start space-x-4">
             <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0 mt-0.5">
               {job.company.logoKey ? (
-                <img
+                <Image
                   src={job.company.logoKey}
                   alt={job.company.name}
+                  width={48}
+                  height={48}
+                  unoptimized
                   className="w-full h-full object-cover"
                 />
               ) : (
