@@ -11,6 +11,7 @@ import {
   Sparkles,
   CheckCircle2,
   Clock,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useAuth } from '../lib/auth-context';
 
@@ -78,35 +79,45 @@ export function JobCard({
   return (
     <div
       onClick={() => onSelect(job)}
-      className={`relative rounded-xl p-4 sm:p-5 cursor-pointer transition-all border ${
+      className={`group relative rounded-2xl p-4 sm:p-5 cursor-pointer transition-all duration-200 border ${
         isSelected
-          ? 'bg-white dark:bg-obsidian-surface border-cobalt-600 dark:border-cobalt-500 shadow-sm ring-1 ring-cobalt-600/20 dark:ring-cobalt-500/20'
-          : 'bg-white dark:bg-obsidian-surface border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+          ? 'glass-card-active'
+          : 'glass-card'
       }`}
     >
+      {/* Left indicator bar for active selection */}
+      {isSelected && (
+        <span className="absolute left-0 top-3 bottom-3 w-1.5 bg-gradient-to-b from-blue-600 via-indigo-600 to-violet-600 rounded-r-full shadow-[0_0_12px_rgba(37,99,235,0.8)]" />
+      )}
+
       {/* Top Header: Company logo & Bookmarking */}
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start space-x-3 min-w-0">
-          <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0 mt-0.5">
+        <div className="flex items-start space-x-3.5 min-w-0">
+          <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.1] flex items-center justify-center overflow-hidden shrink-0 mt-0.5 shadow-sm group-hover:scale-105 transition-transform">
             {job.company.logoKey ? (
               <Image
                 src={job.company.logoKey}
                 alt={job.company.name}
-                width={40}
-                height={40}
+                width={44}
+                height={44}
                 unoptimized
                 className="w-full h-full object-cover"
               />
             ) : (
-              <Building className="w-5 h-5 text-slate-400" />
+              <div className="w-full h-full bg-gradient-to-br from-blue-600/10 to-indigo-600/20 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center text-sm font-mono">
+                {job.company.name.slice(0, 2).toUpperCase()}
+              </div>
             )}
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white hover:text-cobalt-600 dark:hover:text-cobalt-400 line-clamp-1 transition-colors">
-              {job.title}
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-1 transition-colors flex items-center gap-1.5">
+              <span>{job.title}</span>
+              <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 translate-y-1 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all text-blue-600 dark:text-blue-400 shrink-0" />
             </h3>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-              {job.company.name}
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5 truncate flex items-center gap-1">
+              <span>{job.company.name}</span>
+              <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+              <span className="text-[11px] text-slate-400 font-mono">{job.workMode}</span>
             </p>
           </div>
         </div>
@@ -117,32 +128,29 @@ export function JobCard({
               e.stopPropagation();
               onToggleSave(job.id, isSaved);
             }}
-            className={`p-1.5 rounded-lg border transition-all shrink-0 ${
+            className={`p-2 rounded-xl border transition-all shrink-0 ${
               isSaved
-                ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60 text-amber-600 dark:text-amber-400'
-                : 'bg-transparent border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:border-slate-200 dark:hover:border-slate-700'
+                ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300/80 dark:border-amber-700/60 text-amber-600 dark:text-amber-400 shadow-sm'
+                : 'bg-transparent border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.08]'
             }`}
             title={isSaved ? 'Bỏ lưu' : 'Lưu tin tuyển dụng'}
           >
-            <Bookmark className="w-3.5 h-3.5 fill-current" />
+            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
           </button>
         )}
       </div>
 
-      {/* Badges: Salary, Location, Mode, Level */}
-      <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
-        <span className="inline-flex items-center px-2 py-0.5 rounded-md font-mono font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 tabular-nums">
-          <DollarSign className="w-3 h-3 mr-0.5" />
+      {/* Badges: Salary, Location, Level */}
+      <div className="mt-3.5 flex flex-wrap items-center gap-1.5 text-xs">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 tabular-nums shadow-sm text-[11px]">
+          <DollarSign className="w-3 h-3 mr-0.5 text-emerald-600 dark:text-emerald-400" />
           {formatSalary(job.salaryMin, job.salaryMax)}
         </span>
-        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-700/50">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-white/[0.05] border border-slate-200/70 dark:border-white/[0.08] text-[11px]">
           <MapPin className="w-3 h-3 mr-1 text-slate-400" />
           {job.location}
         </span>
-        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-700/50">
-          {job.workMode}
-        </span>
-        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-700/50">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-white/[0.05] border border-slate-200/70 dark:border-white/[0.08] text-[11px] font-medium">
           {job.level}
         </span>
       </div>
@@ -152,24 +160,24 @@ export function JobCard({
         {job.skills.slice(0, 4).map((s) => (
           <span
             key={s.skill.id}
-            className={`px-1.5 py-0.5 rounded text-[11px] font-medium ${
+            className={`px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide ${
               s.isRequired
-                ? 'bg-cobalt-50 dark:bg-cobalt-950/60 text-cobalt-700 dark:text-cobalt-300 border border-cobalt-200/70 dark:border-cobalt-800/60'
-                : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400'
+                ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/60'
+                : 'bg-slate-100/80 dark:bg-white/[0.04] text-slate-600 dark:text-slate-400 border border-slate-200/50 dark:border-white/[0.05]'
             }`}
           >
             {s.skill.name}
           </span>
         ))}
         {job.skills.length > 4 && (
-          <span className="px-1.5 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-slate-800/60 text-slate-400">
+          <span className="px-1.5 py-0.5 rounded-md text-[10px] font-mono font-medium bg-slate-100 dark:bg-white/[0.04] text-slate-400">
             +{job.skills.length - 4}
           </span>
         )}
       </div>
 
       {/* Footer Info & Status */}
-      <div className="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+      <div className="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between text-xs">
         <span className="text-[11px] text-slate-400 font-mono flex items-center">
           <Clock className="w-3 h-3 mr-1" />
           {new Date(job.publishedAt).toLocaleDateString('vi-VN')}
@@ -182,16 +190,16 @@ export function JobCard({
                 e.stopPropagation();
                 onCheckAiMatch(job);
               }}
-              className="text-[11px] font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 hover:underline flex items-center space-x-1"
+              className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center space-x-1 px-2 py-0.5 rounded-md hover:bg-blue-50 dark:hover:bg-blue-950/40 transition"
             >
-              <Sparkles className="w-3 h-3" />
-              <span>Khớp AI</span>
+              <Sparkles className="w-3 h-3 text-blue-500" />
+              <span>So khớp AI</span>
             </button>
           )}
 
           {hasApplied && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800">
-              <CheckCircle2 className="w-3 h-3 mr-1" />
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-700/60 shadow-sm">
+              <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600" />
               Đã nộp
             </span>
           )}

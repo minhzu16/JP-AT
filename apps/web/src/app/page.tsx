@@ -164,24 +164,24 @@ export default function HomePage() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* TAB 1: DUAL-PANE WORKSTATION - PUBLIC JOB DISCOVERY */}
         {activeTab === 'jobs' && (
-          <div className="space-y-5">
+          <div className="space-y-6">
             {/* Command & Filter Bar */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface p-4 shadow-sm">
-              <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
-                {/* Search input */}
-                <div className="flex-1 flex items-center px-3 py-2 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 focus-within:border-cobalt-500 focus-within:ring-1 focus-within:ring-cobalt-500 transition">
-                  <Search className="w-4 h-4 text-slate-400 shrink-0 mr-2.5" />
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-obsidian-surface/90 backdrop-blur-xl p-5 shadow-sm">
+              <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3.5">
+                {/* Search input with Spotlight focus */}
+                <div className="flex-1 flex items-center px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                  <Search className="w-4 h-4 text-slate-400 shrink-0 mr-3" />
                   <input
                     type="text"
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
-                    placeholder="Chức danh, công nghệ kỹ thuật (React, NestJS, Go, Kubernetes)..."
+                    placeholder="Tìm kiếm vị trí kỹ thuật, công nghệ (React, NestJS, Go, Kubernetes, Rust)..."
                     className="w-full text-xs sm:text-sm bg-transparent border-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
                   />
                   {keyword && (
                     <button
                       onClick={() => setKeyword('')}
-                      className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-1"
                     >
                       ×
                     </button>
@@ -189,14 +189,14 @@ export default function HomePage() {
                 </div>
 
                 {/* Filters Row */}
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2.5">
                   {/* Location dropdown */}
-                  <div className="flex items-center px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 text-xs">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 mr-1.5 shrink-0" />
+                  <div className="flex items-center px-3 py-2 rounded-2xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 text-xs">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 mr-2 shrink-0" />
                     <select
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="bg-transparent border-none text-slate-800 dark:text-slate-200 focus:outline-none text-xs"
+                      className="bg-transparent border-none text-slate-800 dark:text-slate-200 focus:outline-none text-xs font-medium cursor-pointer"
                     >
                       <option value="">Tất cả địa điểm</option>
                       <option value="Hồ Chí Minh">Hồ Chí Minh</option>
@@ -206,11 +206,11 @@ export default function HomePage() {
                   </div>
 
                   {/* Work Mode */}
-                  <div className="flex items-center px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 text-xs">
+                  <div className="flex items-center px-3 py-2 rounded-2xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 text-xs">
                     <select
                       value={workMode}
                       onChange={(e) => setWorkMode(e.target.value)}
-                      className="bg-transparent border-none text-slate-800 dark:text-slate-200 focus:outline-none text-xs"
+                      className="bg-transparent border-none text-slate-800 dark:text-slate-200 focus:outline-none text-xs font-medium cursor-pointer"
                     >
                       <option value="">Hình thức</option>
                       <option value="ONSITE">Onsite</option>
@@ -220,11 +220,11 @@ export default function HomePage() {
                   </div>
 
                   {/* Level */}
-                  <div className="flex items-center px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 text-xs">
+                  <div className="flex items-center px-3 py-2 rounded-2xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 text-xs">
                     <select
                       value={level}
                       onChange={(e) => setLevel(e.target.value)}
-                      className="bg-transparent border-none text-slate-800 dark:text-slate-200 focus:outline-none text-xs"
+                      className="bg-transparent border-none text-slate-800 dark:text-slate-200 focus:outline-none text-xs font-medium cursor-pointer"
                     >
                       <option value="">Cấp bậc</option>
                       <option value="INTERN">Intern</option>
@@ -238,7 +238,7 @@ export default function HomePage() {
                   {hasActiveFilters && (
                     <button
                       onClick={handleClearFilters}
-                      className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900 transition flex items-center space-x-1"
+                      className="px-3 py-2 rounded-2xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900 transition flex items-center space-x-1.5"
                     >
                       <RotateCcw className="w-3 h-3" />
                       <span>Xóa lọc</span>
@@ -248,17 +248,17 @@ export default function HomePage() {
               </div>
 
               {/* Skills Quick Chips */}
-              <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center gap-1.5 text-xs">
-                <span className="text-[11px] font-mono text-slate-400 mr-1">Chuyên môn:</span>
+              <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center gap-1.5 text-xs">
+                <span className="text-[11px] font-mono text-slate-400 mr-1.5 font-medium">Chuyên môn:</span>
                 {skills.slice(0, 10).map((s) => {
                   const isSelected = selectedSkillId === s.id;
                   return (
                     <button
                       key={s.id}
                       onClick={() => setSelectedSkillId(isSelected ? '' : s.id)}
-                      className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition ${
+                      className={`px-3 py-1 rounded-xl text-[11px] font-semibold transition-all ${
                         isSelected
-                          ? 'bg-cobalt-600 text-white'
+                          ? 'bg-blue-600 text-white shadow-xs'
                           : 'bg-slate-100 dark:bg-obsidian-card text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-800'
                       }`}
                     >
@@ -273,14 +273,15 @@ export default function HomePage() {
             <div className="flex items-center justify-between text-xs px-1">
               <div className="flex items-center space-x-2">
                 <span className="font-semibold text-slate-900 dark:text-white">
-                  Kết quả tìm kiếm:
+                  Kết quả tuyển dụng:
                 </span>
-                <span className="font-mono text-cobalt-600 dark:text-cobalt-400 font-bold tabular-nums">
-                  {jobs.length} vị trí
+                <span className="font-mono text-blue-600 dark:text-blue-400 font-bold tabular-nums">
+                  {jobs.length} vị trí đang mở
                 </span>
               </div>
-              <div className="text-slate-400 font-mono text-[11px]">
-                Workstation Mode • Dual-Pane Explorer
+              <div className="text-slate-400 font-mono text-[11px] flex items-center space-x-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Dual-Pane Workstation • Live Pipeline</span>
               </div>
             </div>
 

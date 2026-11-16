@@ -15,6 +15,12 @@ import {
   Send,
   User,
   ArrowRight,
+  ChevronRight,
+  Briefcase,
+  MapPin,
+  Mail,
+  Award,
+  Zap,
 } from 'lucide-react';
 import { fetchApi } from '../lib/api';
 import { InterviewModal } from './InterviewModal';
@@ -140,7 +146,6 @@ export function ApplicantDetailDrawer({
       const res = await fetchApi<{ downloadUrl: string; originalFilename: string }>(
         `/recruiter/applications/${applicationId}/resume`
       );
-      // Trigger download
       window.open(res.downloadUrl, '_blank');
     } catch (err: any) {
       alert(err.detail || 'Không thể tải CV');
@@ -151,77 +156,98 @@ export function ApplicantDetailDrawer({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-sm flex justify-end">
-        <div className="w-full max-w-2xl bg-white dark:bg-obsidian-surface h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 animate-in slide-in-from-right duration-150">
+      <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/70 backdrop-blur-md flex justify-end animate-in fade-in duration-200">
+        <div className="w-full max-w-2xl bg-white dark:bg-[#0C101A] h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-white/[0.08] animate-in slide-in-from-right duration-200">
           {/* Top Bar */}
-          <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-obsidian-card">
-            <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center font-bold">
-                <User className="w-4 h-4" />
+          <div className="p-5 sm:p-6 border-b border-slate-200/80 dark:border-white/[0.08] flex items-center justify-between bg-slate-50/80 dark:bg-white/[0.02]">
+            <div className="flex items-center space-x-3.5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/20">
+                <User className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
                   Hồ sơ Ứng viên Tuyển dụng
                 </h3>
-                <span className="text-xs text-slate-500 font-mono">
-                  ID: {applicationId.slice(0, 8)}
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                  REF: {applicationId.slice(0, 8).toUpperCase()}
                 </span>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800 transition"
+              className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.08] transition"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Drawer Body */}
-          <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5">
+          <div className="p-6 sm:p-7 overflow-y-auto flex-1 space-y-6">
             {loading ? (
-              <div className="py-16 flex flex-col items-center justify-center space-y-3">
-                <div className="w-7 h-7 border-2 border-cobalt-600 border-t-transparent rounded-full animate-spin" />
-                <p className="text-xs text-slate-500 font-medium">Đang tải hồ sơ ứng viên...</p>
+              <div className="py-24 flex flex-col items-center justify-center space-y-3">
+                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs text-slate-500 font-medium">Đang đồng bộ hồ sơ ứng viên...</p>
               </div>
             ) : error ? (
-              <div className="p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs border border-rose-200 dark:border-rose-900">
+              <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs border border-rose-200 dark:border-rose-900 font-medium">
                 {error}
               </div>
             ) : app ? (
               <>
                 {/* Candidate Overview Card */}
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-200/80 dark:border-slate-800">
+                <div className="p-5 rounded-2xl glass-card border border-slate-200/80 dark:border-white/[0.08]">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                      <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
                         {app.candidate.fullName}
                       </h2>
-                      <p className="text-xs text-cobalt-600 dark:text-cobalt-400 font-medium mt-0.5">
-                        {app.candidate.headline || 'Ứng viên chưa cập nhật tiêu đề'}
+                      <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold mt-0.5">
+                        {app.candidate.headline || 'Ứng viên kỹ thuật'}
                       </p>
-                      <p className="text-xs text-slate-500 font-mono mt-1">
-                        {app.candidate.location || 'Việt Nam'} • {app.candidate.yearsExperience} năm kinh nghiệm
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-1 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{app.candidate.location || 'Việt Nam'}</span>
+                        <span>•</span>
+                        <span>{app.candidate.yearsExperience} năm kinh nghiệm</span>
                       </p>
                     </div>
 
-                    <span className="px-2.5 py-1 rounded-md text-xs font-mono font-bold uppercase bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
+                    <span className="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                       {STATUS_LABELS[app.status] || app.status}
                     </span>
                   </div>
 
                   {app.candidate.summary && (
-                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 leading-relaxed">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-3.5 pt-3.5 border-t border-slate-100 dark:border-white/[0.06] leading-relaxed">
                       {app.candidate.summary}
                     </p>
                   )}
+
+                  {/* Resume Download Action */}
+                  <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
+                    <span className="text-xs text-slate-500 font-medium flex items-center">
+                      <FileText className="w-4 h-4 mr-1.5 text-blue-500" />
+                      Tài liệu đính kèm
+                    </span>
+                    <button
+                      onClick={handleDownloadResume}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-white/[0.08] hover:bg-slate-200 dark:hover:bg-white/[0.12] text-slate-800 dark:text-slate-200 transition flex items-center space-x-1.5"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Tải file CV</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Status Transition Control (State Machine Enforcement) */}
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-200/80 dark:border-slate-800 space-y-3">
-                  <div className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center justify-between">
-                    <span>Điều chuyển trạng thái (ATS State Machine)</span>
+                {/* State Machine Transition Control */}
+                <div className="p-5 rounded-2xl glass-card border border-blue-500/20 bg-blue-50/20 dark:bg-blue-950/10 space-y-3.5">
+                  <div className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center justify-between font-mono">
+                    <span className="flex items-center space-x-1.5">
+                      <Zap className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                      <span>Điều chuyển vòng tuyển dụng</span>
+                    </span>
                     <span className="text-[11px] font-mono text-slate-500">
-                      Hiện tại: {app.status}
+                      State: {app.status}
                     </span>
                   </div>
 
@@ -230,7 +256,7 @@ export function ApplicantDetailDrawer({
                       <select
                         value={selectedNextStatus}
                         onChange={(e) => setSelectedNextStatus(e.target.value)}
-                        className="text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-cobalt-500"
+                        className="text-xs font-bold rounded-xl border border-slate-300 dark:border-white/[0.15] bg-white dark:bg-slate-900 p-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         {allowedStatuses.map((st: string) => (
                           <option key={st} value={st}>
@@ -243,184 +269,111 @@ export function ApplicantDetailDrawer({
                         type="text"
                         value={transitionReason}
                         onChange={(e) => setTransitionReason(e.target.value)}
-                        placeholder="Lý do chuyển trạng thái..."
-                        className="flex-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 focus:outline-none focus:ring-1 focus:ring-cobalt-500 text-slate-800 dark:text-slate-200"
+                        placeholder="Lý do chuyển trạng thái (bắt buộc khi Từ chối)..."
+                        className="flex-1 text-xs rounded-xl border border-slate-300 dark:border-white/[0.15] bg-white dark:bg-slate-900 p-2.5 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
 
                       <button
                         onClick={handleTransition}
                         disabled={isTransitioning}
-                        className="px-3.5 py-2 text-xs font-medium rounded-lg bg-cobalt-600 hover:bg-cobalt-700 text-white shadow-sm transition disabled:opacity-50 shrink-0 flex items-center justify-center space-x-1"
+                        className="px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md disabled:opacity-50 transition shrink-0"
                       >
-                        <ArrowRight className="w-3.5 h-3.5" />
-                        <span>Cập nhật</span>
+                        {isTransitioning ? 'Đang chuyển...' : 'Xác nhận chuyển'}
                       </button>
                     </div>
                   ) : (
-                    <div className="text-xs text-slate-500 italic">
-                      Đơn này đang ở trạng thái kết thúc ({app.status}). Không có trạng thái tiếp theo hợp lệ.
+                    <div className="text-xs text-slate-500 italic p-2 bg-slate-100 dark:bg-white/[0.04] rounded-lg text-center">
+                      Hồ sơ đang ở trạng thái kết thúc ({app.status}). Không thể chuyển tiếp theo luật State Machine.
                     </div>
                   )}
 
-                  <div className="pt-2 flex justify-end">
+                  {app.status === 'SCREENING' && (
                     <button
                       onClick={() => setIsInterviewModalOpen(true)}
-                      className="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center space-x-1.5 transition"
+                      className="w-full mt-2 py-2.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-sm transition flex items-center justify-center space-x-1.5"
                     >
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>Đặt lịch phỏng vấn</span>
+                      <Calendar className="w-4 h-4" />
+                      <span>Lên lịch phỏng vấn chính thức</span>
                     </button>
-                  </div>
-                </div>
-
-                {/* Candidate Skills */}
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                    Kỹ năng ứng viên sở hữu
-                  </h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {app.candidate.skills?.map((cs: any) => (
-                      <span
-                        key={cs.id}
-                        className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium"
-                      >
-                        {cs.skill.name} • Level {cs.level}/5 ({cs.years} năm)
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Attached Resume */}
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                    Hồ sơ CV đính kèm
-                  </h4>
-                  {app.resume ? (
-                    <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
-                      <div className="flex items-center space-x-3">
-                        <FileText className="w-6 h-6 text-brand-600" />
-                        <div>
-                          <p className="text-xs font-bold text-slate-900 dark:text-white">
-                            {app.resume.originalFilename}
-                          </p>
-                          <p className="text-[11px] text-slate-500">
-                            {(app.resume.sizeBytes / 1024).toFixed(0)} KB • Quét an toàn: {app.resume.scanStatus}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleDownloadResume}
-                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 flex items-center space-x-1 text-slate-800 dark:text-slate-200 shadow-sm"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>Tải CV (Audit Log)</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="text-xs text-slate-400 italic">Không có CV đính kèm</div>
                   )}
                 </div>
 
-                {/* Scheduled Interviews */}
-                {app.interviews?.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Lịch phỏng vấn đã lên ({app.interviews.length})
-                    </h4>
-                    <div className="space-y-2">
-                      {app.interviews.map((iv: any) => (
-                        <div
-                          key={iv.id}
-                          className="p-3.5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/40 text-xs space-y-1"
-                        >
-                          <div className="flex justify-between font-bold text-emerald-900 dark:text-emerald-300">
-                            <span>Vòng {iv.round}: {iv.mode}</span>
-                            <span>{new Date(iv.scheduledAt).toLocaleString('vi-VN')}</span>
-                          </div>
-                          <div className="text-slate-600 dark:text-slate-300">
-                            <span className="font-semibold">Địa điểm/Link: </span>
-                            <a
-                              href={iv.locationOrLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-brand-600 underline font-mono text-[11px]"
-                            >
-                              {iv.locationOrLink}
-                            </a>
-                          </div>
-                          {iv.interviewerNames && (
-                            <div className="text-slate-500 text-[11px]">
-                              Người phỏng vấn: {iv.interviewerNames}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Recruiter Internal Notes */}
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center">
-                    <MessageSquare className="w-3.5 h-3.5 mr-1" />
-                    Ghi chú nội bộ nhà tuyển dụng
-                  </h4>
-                  <div className="space-y-2 mb-3">
-                    {app.notes?.map((n: any) => (
-                      <div
-                        key={n.id}
-                        className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-xs text-slate-800 dark:text-slate-200"
-                      >
-                        <p>{n.body}</p>
-                        <div className="text-[10px] text-slate-400 mt-1 flex justify-between">
-                          <span>{n.author?.email}</span>
-                          <span>{new Date(n.createdAt).toLocaleString('vi-VN')}</span>
-                        </div>
-                      </div>
-                    ))}
-                    {(!app.notes || app.notes.length === 0) && (
-                      <p className="text-xs text-slate-400 italic">Chưa có ghi chú nội bộ nào.</p>
-                    )}
-                  </div>
+                {/* Internal Recruiter Notes */}
+                <div className="p-5 rounded-2xl glass-card space-y-4">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center space-x-2">
+                    <MessageSquare className="w-4 h-4 text-blue-500" />
+                    <span>Ghi chú nội bộ Hội đồng tuyển dụng ({app.notes?.length || 0})</span>
+                  </h3>
 
                   <form onSubmit={handleAddNote} className="flex gap-2">
                     <input
                       type="text"
                       value={noteBody}
                       onChange={(e) => setNoteBody(e.target.value)}
-                      placeholder="Thêm ghi chú đánh giá ứng viên..."
-                      className="flex-1 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5"
+                      placeholder="Thêm nhận xét kỹ thuật, kết quả trao đổi..."
+                      className="flex-1 text-xs rounded-xl border border-slate-300 dark:border-white/[0.15] bg-white dark:bg-slate-900 p-2.5 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button
                       type="submit"
-                      disabled={isAddingNote || !noteBody.trim()}
-                      className="px-3.5 py-2 text-xs font-bold rounded-xl bg-brand-600 hover:bg-brand-700 text-white disabled:opacity-50"
+                      disabled={isAddingNote}
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-950 hover:bg-slate-800 transition shrink-0"
                     >
-                      <Send className="w-3.5 h-3.5" />
+                      {isAddingNote ? 'Lưu...' : 'Gửi'}
                     </button>
                   </form>
+
+                  <div className="space-y-2.5 max-h-48 overflow-y-auto">
+                    {app.notes?.map((n: any) => (
+                      <div
+                        key={n.id}
+                        className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.06] text-xs"
+                      >
+                        <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono mb-1">
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">
+                            {n.author?.fullName || n.author?.email}
+                          </span>
+                          <span>{new Date(n.createdAt).toLocaleString('vi-VN')}</span>
+                        </div>
+                        <p className="text-slate-800 dark:text-slate-200 leading-relaxed">
+                          {n.body}
+                        </p>
+                      </div>
+                    ))}
+                    {(!app.notes || app.notes.length === 0) && (
+                      <p className="text-xs text-slate-400 italic text-center py-2">
+                        Chưa có ghi chú nào cho ứng viên này.
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                {/* Audit Trail / History */}
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center">
-                    <History className="w-3.5 h-3.5 mr-1" />
-                    Lịch sử thay đổi trạng thái (Audit Trail)
-                  </h4>
-                  <div className="space-y-1.5 border-l-2 border-slate-200 dark:border-slate-800 ml-2 pl-3">
-                    {app.history?.map((h: any) => (
-                      <div key={h.id} className="text-xs py-1">
-                        <div className="flex items-center space-x-1.5 text-slate-800 dark:text-slate-200 font-semibold">
-                          <span>{h.fromStatus}</span>
-                          <ArrowRight className="w-3 h-3 text-slate-400" />
-                          <span className="text-brand-600">{h.toStatus}</span>
+                {/* Audit Timeline History */}
+                <div className="p-5 rounded-2xl glass-card space-y-3.5">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center space-x-2">
+                    <History className="w-4 h-4 text-slate-400" />
+                    <span>Lịch sử luồng trạng thái ứng tuyển (Audit Trail)</span>
+                  </h3>
+
+                  <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-white/[0.1]">
+                    {app.history?.map((h: any, idx: number) => (
+                      <div key={h.id || idx} className="relative text-xs">
+                        <span className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-white dark:ring-slate-900" />
+                        <div className="font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                          <span>{STATUS_LABELS[h.toStatus] || h.toStatus}</span>
+                          {h.fromStatus && (
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              (từ {STATUS_LABELS[h.fromStatus] || h.fromStatus})
+                            </span>
+                          )}
                         </div>
                         {h.reason && (
-                          <div className="text-slate-500 text-[11px] mt-0.5">Lý do: {h.reason}</div>
+                          <p className="text-slate-600 dark:text-slate-400 mt-0.5 italic">
+                            Lý do: {h.reason}
+                          </p>
                         )}
-                        <div className="text-[10px] text-slate-400 mt-0.5">
-                          {new Date(h.changedAt).toLocaleString('vi-VN')}
-                        </div>
+                        <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
+                          {new Date(h.createdAt).toLocaleString('vi-VN')} • bởi {h.actor?.fullName || h.actor?.email || 'Hệ thống'}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -431,16 +384,21 @@ export function ApplicantDetailDrawer({
         </div>
       </div>
 
-      <InterviewModal
-        applicationId={applicationId}
-        candidateName={app?.candidate?.fullName || ''}
-        isOpen={isInterviewModalOpen}
-        onClose={() => setIsInterviewModalOpen(false)}
-        onSuccess={() => {
-          loadData();
-          onStatusUpdated();
-        }}
-      />
+      {/* Schedule Interview Modal */}
+      {isInterviewModalOpen && app && (
+        <InterviewModal
+          applicationId={app.id}
+          candidateName={app.candidate.fullName}
+          jobTitle={app.job?.title || 'Vị trí kỹ thuật'}
+          isOpen={isInterviewModalOpen}
+          onClose={() => setIsInterviewModalOpen(false)}
+          onSuccess={() => {
+            setIsInterviewModalOpen(false);
+            loadData();
+            onStatusUpdated();
+          }}
+        />
+      )}
     </>
   );
 }

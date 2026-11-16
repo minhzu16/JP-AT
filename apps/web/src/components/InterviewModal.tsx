@@ -7,12 +7,14 @@ import { fetchApi } from '../lib/api';
 export function InterviewModal({
   applicationId,
   candidateName,
+  jobTitle,
   isOpen,
   onClose,
   onSuccess,
 }: {
   applicationId: string;
   candidateName: string;
+  jobTitle?: string;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -73,7 +75,10 @@ export function InterviewModal({
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                 Lên lịch phỏng vấn kỹ thuật
               </h3>
-              <p className="text-xs text-slate-500 font-mono">Ứng viên: {candidateName}</p>
+              <p className="text-xs text-slate-500 font-mono">
+                Ứng viên: <span className="font-semibold text-slate-700 dark:text-slate-300">{candidateName}</span>
+                {jobTitle && <span className="text-slate-400"> • {jobTitle}</span>}
+              </p>
             </div>
           </div>
           <button

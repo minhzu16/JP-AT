@@ -19,6 +19,9 @@ import {
   ShieldCheck,
   ChevronRight,
   ArrowLeft,
+  Check,
+  Award,
+  Zap,
 } from 'lucide-react';
 import { JobItem, formatSalary } from './JobCard';
 import { useAuth } from '../lib/auth-context';
@@ -37,7 +40,7 @@ export function JobDossier({
   job: JobItem | null;
   hasApplied: boolean;
   appliedStatus?: string;
-  isSaved: boolean;
+  isSaved?: boolean;
   onToggleSave: (jobId: string, current: boolean) => void;
   onApplySuccess: () => void;
   onOpenAiMatch: (job: JobItem) => void;
@@ -71,15 +74,15 @@ export function JobDossier({
 
   if (!job) {
     return (
-      <div className="h-full min-h-[460px] rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center p-8 text-center bg-slate-50/50 dark:bg-obsidian-surface/50">
-        <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
-          <Briefcase className="w-6 h-6 stroke-[1.5]" />
+      <div className="h-full min-h-[500px] rounded-3xl glass-panel flex flex-col items-center justify-center p-8 sm:p-12 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4 shadow-sm">
+          <Briefcase className="w-8 h-8 stroke-[1.5]" />
         </div>
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">
           Chưa chọn tin tuyển dụng
         </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
-          Chọn một vị trí từ danh sách bên trái để kiểm tra hồ sơ kỹ thuật, ma trận kỹ năng và nộp đơn trực tiếp.
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 max-w-sm leading-relaxed">
+          Chọn một vị trí kỹ thuật từ danh sách bên trái để khám phá ma trận yêu cầu chuyên môn, đánh giá năng lực AI và nộp đơn trực tiếp.
         </p>
       </div>
     );
@@ -105,12 +108,12 @@ export function JobDossier({
         }),
       });
 
-      setSuccessMsg('Nộp đơn ứng tuyển thành công! Hồ sơ đã được chuyển tới ATS của nhà tuyển dụng.');
+      setSuccessMsg('Nộp đơn ứng tuyển thành công! Hồ sơ đã được chuyển tiếp vào hệ thống ATS tuyển dụng.');
       setShowApplyTray(false);
       onApplySuccess();
     } catch (err: any) {
       if (err.code === 'ALREADY_APPLIED' || err.status === 409) {
-        setErrorMsg('Bạn đã nộp đơn cho vị trí này. Hệ thống ngăn chặn nộp trùng lặp.');
+        setErrorMsg('Bạn đã nộp đơn cho vị trí này. Hệ thống đã lưu trữ bản ghi trước đó.');
       } else {
         setErrorMsg(err.detail || 'Không thể gửi đơn ứng tuyển. Vui lòng thử lại.');
       }
@@ -131,10 +134,10 @@ export function JobDossier({
   const optionalSkills = job.skills.filter((s) => !s.isRequired);
 
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface shadow-sm overflow-hidden flex flex-col">
+    <div className="rounded-3xl glass-panel shadow-xl overflow-hidden flex flex-col border border-slate-200/80 dark:border-white/[0.08]">
       {/* Mobile Back Button */}
       {onBackToList && (
-        <div className="lg:hidden px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-obsidian-card flex items-center">
+        <div className="lg:hidden px-4 py-3 border-b border-slate-100 dark:border-white/[0.06] bg-slate-50/80 dark:bg-white/[0.02] flex items-center">
           <button
             onClick={onBackToList}
             className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center space-x-1.5 hover:text-slate-900"
@@ -146,56 +149,59 @@ export function JobDossier({
       )}
 
       {/* Header Banner */}
-      <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800">
+      <div className="p-6 sm:p-7 border-b border-slate-100 dark:border-white/[0.06] relative">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start space-x-4">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden shrink-0 mt-0.5">
+            <div className="w-14 h-14 rounded-2xl bg-white dark:bg-white/[0.08] border border-slate-200/80 dark:border-white/[0.1] flex items-center justify-center overflow-hidden shrink-0 shadow-md">
               {job.company.logoKey ? (
                 <Image
                   src={job.company.logoKey}
                   alt={job.company.name}
-                  width={48}
-                  height={48}
+                  width={56}
+                  height={56}
                   unoptimized
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <Building className="w-6 h-6 text-slate-400" />
+                <div className="w-full h-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold flex items-center justify-center text-lg font-mono">
+                  {job.company.name.slice(0, 2).toUpperCase()}
+                </div>
               )}
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                   {job.company.name}
                 </span>
-                <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40">
-                  Verified
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800/60 shadow-sm">
+                  <ShieldCheck className="w-3 h-3 mr-1 text-emerald-600" />
+                  Doanh nghiệp xác thực
                 </span>
               </div>
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mt-0.5 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1 tracking-tight">
                 {job.title}
               </h2>
             </div>
           </div>
 
           {/* Top Actions: Bookmark & Share */}
-          <div className="flex items-center space-x-1.5 shrink-0">
+          <div className="flex items-center space-x-2 shrink-0">
             {user?.role === 'CANDIDATE' && (
               <button
-                onClick={() => onToggleSave(job.id, isSaved)}
-                className={`p-2 rounded-lg border transition-colors ${
+                onClick={() => onToggleSave(job.id, !!isSaved)}
+                className={`p-2.5 rounded-xl border transition-all ${
                   isSaved
-                    ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400'
-                    : 'border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                    ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400 shadow-sm'
+                    : 'border-slate-200 dark:border-white/[0.1] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.06]'
                 }`}
-                title={isSaved ? 'Bỏ lưu việc' : 'Lưu tin tuyển dụng'}
+                title={isSaved ? 'Bỏ lưu' : 'Lưu tin'}
               >
-                <Bookmark className="w-4 h-4 fill-current" />
+                <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
               </button>
             )}
             <button
               onClick={handleCopyLink}
-              className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              className="p-2.5 rounded-xl border border-slate-200 dark:border-white/[0.1] text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition"
               title="Sao chép đường dẫn"
             >
               <Share2 className="w-4 h-4" />
@@ -203,107 +209,111 @@ export function JobDossier({
           </div>
         </div>
 
-        {/* Technical Role Meta Tags */}
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-obsidian-card border border-slate-100 dark:border-slate-800">
-            <span className="text-[11px] text-slate-400 block">Mức lương dự kiến</span>
-            <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 block tabular-nums">
+        {/* Technical Role Metric Cards */}
+        <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/[0.06]">
+            <span className="text-[11px] font-medium text-slate-400 block font-mono">Thu nhập đề xuất</span>
+            <span className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400 mt-0.5 block tabular-nums">
               {formatSalary(job.salaryMin, job.salaryMax)}
             </span>
           </div>
 
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-obsidian-card border border-slate-100 dark:border-slate-800">
-            <span className="text-[11px] text-slate-400 block">Địa điểm</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block truncate">
+          <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/[0.06]">
+            <span className="text-[11px] font-medium text-slate-400 block font-mono">Địa điểm</span>
+            <span className="font-bold text-sm text-slate-800 dark:text-slate-200 mt-0.5 block truncate">
               {job.location}
             </span>
           </div>
 
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-obsidian-card border border-slate-100 dark:border-slate-800">
-            <span className="text-[11px] text-slate-400 block">Mô hình làm việc</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block">
+          <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/[0.06]">
+            <span className="text-[11px] font-medium text-slate-400 block font-mono">Mô hình</span>
+            <span className="font-bold text-sm text-slate-800 dark:text-slate-200 mt-0.5 block">
               {job.workMode} • {job.employmentType}
             </span>
           </div>
 
-          <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-obsidian-card border border-slate-100 dark:border-slate-800">
-            <span className="text-[11px] text-slate-400 block">Cấp bậc</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5 block">
+          <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-white/[0.03] border border-slate-200/60 dark:border-white/[0.06]">
+            <span className="text-[11px] font-medium text-slate-400 block font-mono">Cấp bậc</span>
+            <span className="font-bold text-sm text-slate-800 dark:text-slate-200 mt-0.5 block">
               {job.level}
             </span>
           </div>
         </div>
 
         {/* Primary Action Bar */}
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center space-x-2">
+        <div className="mt-5 pt-4 border-t border-slate-100 dark:border-white/[0.06] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center space-x-2.5">
             {hasApplied ? (
-              <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold border border-emerald-200 dark:border-emerald-800">
-                <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+              <div className="inline-flex items-center px-4 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-300 dark:border-emerald-700 shadow-sm">
+                <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" />
                 <span>Đã nộp đơn ({appliedStatus || 'APPLIED'})</span>
               </div>
             ) : user?.role === 'CANDIDATE' ? (
               <button
                 onClick={() => setShowApplyTray(!showApplyTray)}
-                className="px-4 py-2 rounded-lg text-xs font-medium bg-cobalt-600 hover:bg-cobalt-700 text-white shadow-sm transition flex items-center space-x-1.5"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center space-x-2"
               >
                 <Send className="w-3.5 h-3.5" />
-                <span>{showApplyTray ? 'Đóng đơn ứng tuyển' : 'Nộp đơn ngay'}</span>
+                <span>{showApplyTray ? 'Thu gọn đơn' : 'Nộp đơn ngay'}</span>
               </button>
             ) : (
-              <span className="text-xs text-slate-400 italic">
-                (Đăng nhập tài khoản Ứng viên để nộp đơn)
+              <span className="text-xs text-slate-400 font-mono italic">
+                (Đăng nhập tài khoản Ứng viên để nộp đơn trực tiếp)
               </span>
             )}
 
             {user?.role === 'CANDIDATE' && (
               <button
                 onClick={() => onOpenAiMatch(job)}
-                className="px-3 py-2 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-700 hover:border-amber-400 dark:hover:border-amber-500 text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 transition flex items-center space-x-1.5"
+                className="px-4 py-2.5 rounded-xl text-xs font-bold border border-blue-500/30 dark:border-blue-400/30 bg-blue-50/50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition flex items-center space-x-1.5"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>So khớp kỹ năng & CV</span>
+                <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                <span>So khớp năng lực AI</span>
               </button>
             )}
           </div>
 
           <div className="text-[11px] font-mono text-slate-400">
-            Cập nhật: {new Date(job.publishedAt).toLocaleDateString('vi-VN')}
+            Đăng ngày: {new Date(job.publishedAt).toLocaleDateString('vi-VN')}
           </div>
         </div>
 
         {copiedLink && (
-          <div className="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-            Đã sao chép liên kết vào clipboard.
+          <div className="mt-2.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center space-x-1.5">
+            <Check className="w-3.5 h-3.5" />
+            <span>Đã sao chép liên kết vào clipboard!</span>
           </div>
         )}
       </div>
 
       {/* Inline Application Tray */}
       {showApplyTray && (
-        <div className="p-5 bg-slate-50 dark:bg-obsidian-card border-b border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-2 duration-150">
-          <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">
-            Hồ sơ nộp trực tiếp vào hệ thống ATS
-          </h3>
+        <div className="p-6 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-white/[0.08] animate-in slide-in-from-top-2 duration-150">
+          <div className="flex items-center space-x-2 mb-3">
+            <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
+              Nộp hồ sơ trực tiếp vào hệ thống tuyển dụng
+            </h3>
+          </div>
 
-          <form onSubmit={handleApply} className="space-y-3.5">
+          <form onSubmit={handleApply} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Chọn CV đã tải lên trong hệ thống
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Chọn CV đã lưu trong hệ thống
               </label>
               {documents.length === 0 ? (
-                <div className="text-xs text-amber-600 dark:text-amber-400 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                <div className="text-xs text-amber-700 dark:text-amber-400 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
                   Bạn chưa có file CV trong hồ sơ. Hệ thống sẽ ghi nhận thông tin tài khoản hoặc bạn có thể vào tab “Hồ sơ kỹ thuật” để tải lên file PDF.
                 </div>
               ) : (
                 <select
                   value={selectedResumeId}
                   onChange={(e) => setSelectedResumeId(e.target.value)}
-                  className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-cobalt-500"
+                  className="w-full text-xs font-medium rounded-xl border border-slate-300 dark:border-white/[0.12] bg-white dark:bg-slate-800 p-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {documents.map((doc) => (
-                    <option key={doc.id} value={doc.id}>
-                      {doc.fileName} {doc.isDefault ? '(Mặc định)' : ''}
+                  {documents.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.originalFilename} {d.isDefault ? '(Mặc định)' : ''}
                     </option>
                   ))}
                 </select>
@@ -311,39 +321,38 @@ export function JobDossier({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Thư ngỏ / Ghi chú năng lực (Cover note)
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Thư giới thiệu / Lời nhắn tới Nhà tuyển dụng (Tùy chọn)
               </label>
               <textarea
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}
-                placeholder="Tóm tắt ngắn gọn các dự án hoặc điểm mạnh kỹ thuật phù hợp với vai trò này..."
                 rows={3}
-                className="w-full text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-cobalt-500 resize-none"
+                placeholder="Tóm tắt ngắn gọn các dự án nổi bật hoặc lý do bạn phù hợp với vị trí này..."
+                className="w-full text-xs rounded-xl border border-slate-300 dark:border-white/[0.12] bg-white dark:bg-slate-800 p-3 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             {errorMsg && (
-              <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-xs flex items-center space-x-1.5">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{errorMsg}</span>
+              <div className="text-xs text-rose-600 dark:text-rose-400 p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 font-medium">
+                {errorMsg}
               </div>
             )}
 
-            <div className="flex items-center justify-end space-x-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setShowApplyTray(false)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition"
-              >
-                Hủy
-              </button>
+            <div className="flex items-center space-x-3 pt-1">
               <button
                 type="submit"
                 disabled={isApplying}
-                className="px-4 py-1.5 rounded-lg text-xs font-medium bg-cobalt-600 hover:bg-cobalt-700 text-white shadow-sm transition disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md disabled:opacity-50 transition"
               >
-                {isApplying ? 'Đang gửi hồ sơ...' : 'Xác nhận nộp đơn'}
+                {isApplying ? 'Đang gửi...' : 'Xác nhận nộp đơn'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowApplyTray(false)}
+                className="px-4 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-white/[0.06] transition"
+              >
+                Hủy
               </button>
             </div>
           </form>
@@ -351,39 +360,38 @@ export function JobDossier({
       )}
 
       {successMsg && (
-        <div className="m-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs flex items-center space-x-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border-b border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 flex items-center space-x-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
-      {/* Main Dossier Scrollable Body */}
-      <div className="p-5 sm:p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-280px)]">
-        {/* Technical Skill Matrix */}
+      {/* Main Body Content */}
+      <div className="p-6 sm:p-7 space-y-7 flex-1 overflow-y-auto">
+        {/* Skills Evaluation Matrix */}
         <div>
-          <div className="flex items-center space-x-2 mb-3">
-            <Layers className="w-4 h-4 text-slate-400" />
-            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              Ma trận kỹ năng chuyên môn
-            </h3>
-          </div>
+          <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center space-x-2 font-mono">
+            <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span>Ma trận Năng lực & Công nghệ</span>
+          </h3>
 
-          <div className="space-y-2.5">
-            {/* Required Skills */}
+          <div className="mt-3.5 space-y-3">
             {requiredSkills.length > 0 && (
               <div>
-                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                  Kỹ năng bắt buộc (Must-have):
-                </div>
-                <div className="flex flex-wrap gap-1.5">
+                <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider font-mono block mb-2">
+                  Bắt buộc ({requiredSkills.length})
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {requiredSkills.map((s) => (
                     <div
                       key={s.skill.id}
-                      className="px-2.5 py-1 rounded-md text-xs font-medium bg-cobalt-50 dark:bg-cobalt-950/60 text-cobalt-700 dark:text-cobalt-300 border border-cobalt-200/70 dark:border-cobalt-800/60 flex items-center space-x-1.5"
+                      className="p-2.5 rounded-xl bg-blue-50/50 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-900/60 flex items-center justify-between"
                     >
-                      <span>{s.skill.name}</span>
-                      <span className="text-[10px] font-mono px-1 rounded bg-cobalt-100 dark:bg-cobalt-900/80 text-cobalt-800 dark:text-cobalt-200">
-                        w:{s.weight}
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        {s.skill.name}
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-600 text-white font-bold">
+                        Trọng số: {s.weight}x
                       </span>
                     </div>
                   ))}
@@ -391,23 +399,19 @@ export function JobDossier({
               </div>
             )}
 
-            {/* Optional Skills */}
             {optionalSkills.length > 0 && (
-              <div>
-                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1.5">
-                  Kỹ năng bổ trợ / Ưu tiên (Nice-to-have):
-                </div>
+              <div className="pt-2">
+                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider font-mono block mb-2">
+                  Ưu tiên / Lợi thế ({optionalSkills.length})
+                </span>
                 <div className="flex flex-wrap gap-1.5">
                   {optionalSkills.map((s) => (
-                    <div
+                    <span
                       key={s.skill.id}
-                      className="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50 flex items-center space-x-1.5"
+                      className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-white/[0.05] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/[0.06]"
                     >
-                      <span>{s.skill.name}</span>
-                      <span className="text-[10px] font-mono px-1 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                        w:{s.weight}
-                      </span>
-                    </div>
+                      {s.skill.name}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -415,29 +419,25 @@ export function JobDossier({
           </div>
         </div>
 
-        {/* Detailed Role Specifications */}
-        <div>
-          <div className="flex items-center space-x-2 mb-2.5">
-            <FileText className="w-4 h-4 text-slate-400" />
-            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              Mô tả công việc & Yêu cầu chi tiết
-            </h3>
-          </div>
-
-          <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed bg-slate-50/50 dark:bg-obsidian-card p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 font-sans">
+        {/* Job Description */}
+        <div className="pt-6 border-t border-slate-100 dark:border-white/[0.06]">
+          <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono mb-3">
+            Mô tả Chi tiết Vị trí & Trách nhiệm
+          </h3>
+          <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed space-y-2">
             {job.description}
           </div>
         </div>
 
-        {/* Compliance & Anti-bias notice */}
-        <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-obsidian-card border border-slate-200/60 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex items-start space-x-3">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-          <div className="text-[11px] leading-relaxed">
-            <span className="font-semibold text-slate-700 dark:text-slate-300">
-              Cam kết công bằng & Bảo mật dữ liệu:
-            </span>{' '}
-            Hồ sơ ứng tuyển được bảo vệ theo Luật An toàn & Bảo vệ dữ liệu cá nhân 91/2025/QH15. Hệ thống không sử dụng thuật toán AI tự động loại trừ ứng viên (AI ban). Đánh giá dựa trên năng lực thực tế.
+        {/* Company Compliance & Safety */}
+        <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.06] text-xs space-y-1.5">
+          <div className="flex items-center space-x-2 text-slate-800 dark:text-slate-200 font-bold">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>Cam kết Bảo vệ Dữ liệu Cá nhân & Tuyển dụng Công bằng</span>
           </div>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+            Hệ thống áp dụng thuật toán so khớp kỹ năng tất định (Deterministic Skill Matching), tuân thủ Nghị định 13/2023/NĐ-CP và Luật Bảo vệ dữ liệu cá nhân Việt Nam (91/2025/QH15). Ứng viên có quyền tra cứu toàn bộ hồ sơ hoặc yêu cầu xóa dữ liệu bất kỳ lúc nào.
+          </p>
         </div>
       </div>
     </div>
