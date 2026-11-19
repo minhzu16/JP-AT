@@ -4,13 +4,17 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from '../../common/jwt.strategy';
+import { requireSecret } from '../../common/secrets';
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: process.env.JWT_ACCESS_SECRET || 'super-secret-access-token-key-jobportal-2026-xyz',
-      signOptions: { expiresIn: '1h' },
+    // Async so the secret is read after main.ts has loaded .env (a plain register() runs at import time).
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: requireSecret('JWT_ACCESS_SECRET'),
+        signOptions: { expiresIn: '1h' },
+      }),
     }),
   ],
   controllers: [AuthController],

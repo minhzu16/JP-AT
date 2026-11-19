@@ -9,6 +9,7 @@ import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Role, MemberRole, RegisterInput, LoginInput } from '@jobportal/shared';
 import { AuditService } from '../audit/audit.service';
+import { requireSecret } from '../../common/secrets';
 
 @Injectable()
 export class AuthService {
@@ -136,7 +137,7 @@ export class AuthService {
   async refreshToken(token: string) {
     try {
       const payload = this.jwtService.verify(token, {
-        secret: process.env.JWT_REFRESH_SECRET || 'super-secret-refresh-token-key-jobportal-2026-xyz',
+        secret: requireSecret('JWT_REFRESH_SECRET'),
       });
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub },
@@ -187,11 +188,11 @@ export class AuthService {
     const payload = { sub: userId, email, role };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_ACCESS_SECRET || 'super-secret-access-token-key-jobportal-2026-xyz',
+        secret: requireSecret('JWT_ACCESS_SECRET'),
         expiresIn: '1h',
       }),
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_REFRESH_SECRET || 'super-secret-refresh-token-key-jobportal-2026-xyz',
+        secret: requireSecret('JWT_REFRESH_SECRET'),
         expiresIn: '7d',
       }),
     ]);

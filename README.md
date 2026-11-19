@@ -54,6 +54,11 @@ Hệ thống Cổng Thông tin Tuyển dụng & Theo dõi Ứng viên (ATS) hi�
 ## 4. Hướng dẫn Khởi chạy Dự án
 
 ```bash
+# 0. Tạo .env từ mẫu và điền JWT_ACCESS_SECRET, JWT_REFRESH_SECRET
+#    (mỗi giá trị ≥ 32 ký tự và khác nhau; API không khởi động nếu thiếu)
+cp .env.example .env
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+
 # 1. Khởi động PostgreSQL, Redis, Mailpit qua Docker
 rtk docker compose -f infra/docker-compose.yml up -d
 
