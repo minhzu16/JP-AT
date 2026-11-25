@@ -76,14 +76,14 @@ jobs:
       - name: Seed database
         run: pnpm db:seed
 
+      - name: Build
+        run: pnpm build
+
       - name: Lint
         run: pnpm lint
 
       - name: Typecheck API
         run: pnpm --filter @jobportal/api typecheck
-
-      - name: Build
-        run: pnpm build
 
       - name: Run Tests with Coverage
         run: |
@@ -93,12 +93,14 @@ jobs:
       - name: Publish Coverage Summary
         if: always()
         run: |
-          {
-            echo "### Test Coverage - @jobportal/api"
-            echo '```text'
-            tail -n 25 coverage-summary.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -f coverage-summary.txt ]; then
+            {
+              echo "### Test Coverage - @jobportal/api"
+              echo '```text'
+              tail -n 25 coverage-summary.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   docker-build:
     name: Build Docker Images
