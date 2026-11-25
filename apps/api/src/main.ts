@@ -1,4 +1,6 @@
 import { NestFactory } from '@nestjs/core';
+import helmet from 'helmet';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/http-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -13,6 +15,8 @@ dotenv.config();
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+  app.use(helmet());
+  app.use(cookieParser());
 
   // Global Prefix
   app.setGlobalPrefix('api/v1', {

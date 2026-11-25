@@ -12,13 +12,39 @@ import {
   Lock,
 } from 'lucide-react';
 import { fetchApi } from '../lib/api';
+import { AdminUsersPanel } from './admin/AdminUsersPanel';
+import { AdminJobsPanel } from './admin/AdminJobsPanel';
+
+export interface AuditLogActor {
+  email?: string;
+  role?: string;
+}
+
+export interface AuditLogItem {
+  id: string;
+  createdAt: string;
+  actor?: AuditLogActor | null;
+  action: string;
+  entity: string;
+  entityId?: string | null;
+}
+
+export interface DashboardStats {
+  totalUsers: number;
+  totalCandidates: number;
+  totalCompanies: number;
+  totalJobs: number;
+  totalApplications: number;
+  recentAudits: AuditLogItem[];
+}
 
 export function AdminDashboardView() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'users' | 'jobs'>('users');
 
   useEffect(() => {
-    fetchApi('/admin/dashboard')
+    fetchApi<DashboardStats>('/admin/dashboard')
       .then((data) => setStats(data))
       .catch(() => setStats(null))
       .finally(() => setLoading(false));
@@ -77,6 +103,39 @@ export function AdminDashboardView() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div role="tablist" className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'users'}
+          onClick={() => setActiveTab('users')}
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${
+            activeTab === 'users'
+              ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+          }`}
+        >
+          Người dùng
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'jobs'}
+          onClick={() => setActiveTab('jobs')}
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition ${
+            activeTab === 'jobs'
+              ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+          }`}
+        >
+          Tin tuyển dụng
+        </button>
+      </div>
+
+      {/* Tab Panels */}
+      {activeTab === 'users' ? <AdminUsersPanel /> : <AdminJobsPanel />}
+
       {/* Live Security Audit Trail */}
       <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface p-5 space-y-3.5">
         <div className="flex items-center justify-between">
@@ -99,7 +158,7 @@ export function AdminDashboardView() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {stats?.recentAudits?.map((log: any) => (
+              {stats?.recentAudits?.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                   <td className="p-3 text-slate-400 font-mono text-[11px]">
                     {new Date(log.createdAt).toLocaleString('vi-VN')}

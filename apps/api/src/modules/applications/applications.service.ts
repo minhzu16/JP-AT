@@ -149,7 +149,7 @@ export class ApplicationsService {
       });
 
       return application;
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
         throw new ConflictException({
           code: 'ALREADY_APPLIED',

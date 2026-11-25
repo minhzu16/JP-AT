@@ -16,13 +16,37 @@ import {
 import { fetchApi } from '../lib/api';
 import { formatSalary } from './JobCard';
 
+interface JobSkillItem {
+  isRequired?: boolean;
+  skill: { id: string; name: string };
+}
+
+interface SkillItem {
+  id: string;
+  name: string;
+}
+
+interface RecruiterJobItem {
+  id: string;
+  title: string;
+  status: string;
+  location: string;
+  workMode: string;
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  skills?: JobSkillItem[];
+  _count?: {
+    applications: number;
+  };
+}
+
 export function RecruiterJobsView({
   onSelectJobForATS,
 }: {
   onSelectJobForATS?: (jobId: string) => void;
 }) {
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [skills, setSkills] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<RecruiterJobItem[]>([]);
+  const [skills, setSkills] = useState<SkillItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -41,8 +65,8 @@ export function RecruiterJobsView({
   const loadData = () => {
     setLoading(true);
     Promise.all([
-      fetchApi<any[]>('/jobs/recruiter/my-jobs'),
-      fetchApi<any[]>('/skills'),
+      fetchApi<RecruiterJobItem[]>('/jobs/recruiter/my-jobs'),
+      fetchApi<SkillItem[]>('/skills'),
     ])
       .then(([jobsRes, skillsRes]) => {
         setJobs(jobsRes || []);
@@ -82,8 +106,8 @@ export function RecruiterJobsView({
       setDescription('');
       setSelectedSkills([]);
       loadData();
-    } catch (err: any) {
-      alert(err.detail || 'Không thể tạo tin tuyển dụng');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Không thể tạo tin tuyển dụng');
     } finally {
       setIsSubmitting(false);
     }
@@ -100,7 +124,7 @@ export function RecruiterJobsView({
     });
   };
 
-  const handleTogglePublish = async (job: any) => {
+  const handleTogglePublish = async (job: RecruiterJobItem) => {
     try {
       if (job.status === 'PUBLISHED') {
         await fetchApi(`/jobs/${job.id}/close`, { method: 'POST' });
@@ -108,8 +132,8 @@ export function RecruiterJobsView({
         await fetchApi(`/jobs/${job.id}/publish`, { method: 'POST' });
       }
       loadData();
-    } catch (err: any) {
-      alert(err.detail || 'Không thể thay đổi trạng thái');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Không thể thay đổi trạng thái');
     }
   };
 
@@ -178,7 +202,7 @@ export function RecruiterJobsView({
                 </div>
 
                 <div className="flex flex-wrap gap-1 pt-1">
-                  {job.skills?.map((s: any) => (
+                  {job.skills?.map((s: JobSkillItem) => (
                     <span
                       key={s.skill.id}
                       className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-obsidian-card text-slate-600 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800"

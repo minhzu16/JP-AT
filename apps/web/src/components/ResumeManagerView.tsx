@@ -14,9 +14,40 @@ import {
 } from 'lucide-react';
 import { fetchApi } from '../lib/api';
 
+interface ProfileSkillItem {
+  id: string;
+  skill: { name: string };
+  level: number;
+  years: number;
+}
+
+interface CandidateProfile {
+  id?: string;
+  fullName: string;
+  headline?: string | null;
+  location?: string | null;
+  yearsExperience?: number | null;
+  summary?: string | null;
+  skills?: ProfileSkillItem[];
+}
+
+interface ResumeDocumentItem {
+  id: string;
+  originalFilename: string;
+  isDefault: boolean;
+  sizeBytes: number;
+  scanStatus: string;
+  sha256?: string | null;
+}
+
+interface PresignedUploadResponse {
+  storageKey: string;
+  uploadUrl?: string;
+}
+
 export function ResumeManagerView() {
-  const [profile, setProfile] = useState<any>(null);
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [profile, setProfile] = useState<CandidateProfile | null>(null);
+  const [documents, setDocuments] = useState<ResumeDocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [newCvName, setNewCvName] = useState('');
@@ -24,8 +55,8 @@ export function ResumeManagerView() {
   const loadData = () => {
     setLoading(true);
     Promise.all([
-      fetchApi('/me/profile'),
-      fetchApi<any[]>('/me/documents'),
+      fetchApi<CandidateProfile>('/me/profile'),
+      fetchApi<ResumeDocumentItem[]>('/me/documents'),
     ])
       .then(([prof, docs]) => {
         setProfile(prof);
@@ -47,7 +78,7 @@ export function ResumeManagerView() {
       const filename = newCvName.endsWith('.pdf') ? newCvName : `${newCvName}.pdf`;
 
       // 1. Get presigned upload URL
-      const presigned = await fetchApi('/me/documents/upload-url', {
+      const presigned = await fetchApi<PresignedUploadResponse>('/me/documents/upload-url', {
         method: 'POST',
         body: JSON.stringify({
           filename,
@@ -70,8 +101,8 @@ export function ResumeManagerView() {
 
       setNewCvName('');
       loadData();
-    } catch (err: any) {
-      alert(err.detail || 'Lỗi khi upload CV');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Lỗi khi upload CV');
     } finally {
       setIsUploading(false);
     }
@@ -81,8 +112,8 @@ export function ResumeManagerView() {
     try {
       await fetchApi(`/me/documents/${id}/set-default`, { method: 'POST' });
       loadData();
-    } catch (err: any) {
-      alert(err.detail || 'Không thể đặt làm mặc định');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Không thể đặt làm mặc định');
     }
   };
 
@@ -91,8 +122,8 @@ export function ResumeManagerView() {
     try {
       await fetchApi(`/me/documents/${id}`, { method: 'DELETE' });
       loadData();
-    } catch (err: any) {
-      alert(err.detail || 'Không thể xóa');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Không thể xóa');
     }
   };
 
@@ -139,7 +170,7 @@ export function ResumeManagerView() {
               Kỹ năng đã khai báo ({profile.skills?.length || 0})
             </h4>
             <div className="flex flex-wrap gap-1.5">
-              {profile.skills?.map((s: any) => (
+              {profile.skills?.map((s: ProfileSkillItem) => (
                 <span
                   key={s.id}
                   className="px-2.5 py-1 rounded-md bg-cobalt-50 dark:bg-cobalt-950/60 text-cobalt-700 dark:text-cobalt-300 text-xs font-medium border border-cobalt-200/60 dark:border-cobalt-800/60"

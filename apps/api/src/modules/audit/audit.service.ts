@@ -27,8 +27,9 @@ export class AuditService {
         },
       });
       this.logger.log(`Audit: [${params.action}] on ${params.entity}:${params.entityId} by ${params.actorId || 'system'}`);
-    } catch (err: any) {
-      this.logger.error(`Failed to record audit log: ${err.message}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Failed to record audit log: ${msg}`);
     }
   }
 }

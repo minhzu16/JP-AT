@@ -23,7 +23,7 @@ export class InterviewsController {
   @Roles(Role.RECRUITER)
   async create(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = InterviewCreateSchema.safeParse(body);
     if (!parsed.success) {
@@ -40,7 +40,7 @@ export class InterviewsController {
   async update(
     @Param('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = InterviewUpdateSchema.safeParse(body);
     if (!parsed.success) {

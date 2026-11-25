@@ -20,7 +20,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let title = 'Internal Server Error';
-    let detail: any = 'An unexpected error occurred';
+    let detail: unknown = 'An unexpected error occurred';
     let errorCode: string | undefined = undefined;
 
     if (exception instanceof HttpException) {
@@ -29,9 +29,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       if (typeof res === 'string') {
         detail = res;
       } else if (typeof res === 'object' && res !== null) {
-        const obj = res as any;
+        const obj = res as Record<string, unknown>;
         detail = obj.message || obj.detail || JSON.stringify(obj);
-        errorCode = obj.code || obj.error;
+        errorCode = String(obj.code || obj.error || 'ERROR');
       }
       title = exception.name;
     } else if (exception instanceof Prisma.PrismaClientKnownRequestError) {

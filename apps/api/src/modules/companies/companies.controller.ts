@@ -26,7 +26,7 @@ export class CompaniesController {
   async update(
     @Param('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     return this.companiesService.update(id, user.userId, body);
   }

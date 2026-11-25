@@ -27,7 +27,7 @@ export class JobsController {
   constructor(private jobsService: JobsService) {}
 
   @Get()
-  async search(@Query() query: any) {
+  async search(@Query() query: Record<string, unknown>) {
     const parsed = JobFilterQuerySchema.safeParse(query);
     if (!parsed.success) {
       throw new BadRequestException({
@@ -56,7 +56,7 @@ export class JobsController {
   @Roles(Role.RECRUITER)
   async createJob(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = JobCreateSchema.safeParse(body);
     if (!parsed.success) {
@@ -74,7 +74,7 @@ export class JobsController {
   async updateJob(
     @Param('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = JobUpdateSchema.safeParse(body);
     if (!parsed.success) {

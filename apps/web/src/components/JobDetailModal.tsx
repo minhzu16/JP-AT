@@ -19,6 +19,13 @@ import { JobItem, formatSalary } from './JobCard';
 import { useAuth } from '../lib/auth-context';
 import { fetchApi } from '../lib/api';
 
+interface ResumeDocument {
+  id: string;
+  originalFilename: string;
+  isDefault: boolean;
+  sizeBytes: number;
+}
+
 export function JobDetailModal({
   job,
   isOpen,
@@ -37,7 +44,7 @@ export function JobDetailModal({
   onOpenAiMatch: (job: JobItem) => void;
 }) {
   const { user } = useAuth();
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<ResumeDocument[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<string>('');
   const [coverLetter, setCoverLetter] = useState('');
   const [isApplying, setIsApplying] = useState(false);
@@ -46,7 +53,7 @@ export function JobDetailModal({
 
   useEffect(() => {
     if (isOpen && user?.role === 'CANDIDATE') {
-      fetchApi<any[]>('/me/documents')
+      fetchApi<ResumeDocument[]>('/me/documents')
         .then((docs) => {
           setDocuments(docs || []);
           const def = docs.find((d) => d.isDefault);
@@ -82,11 +89,12 @@ export function JobDetailModal({
 
       setSuccessMsg('Nộp đơn ứng tuyển thành công! Nhà tuyển dụng sẽ xem xét hồ sơ của bạn.');
       onApplySuccess();
-    } catch (err: any) {
-      if (err.code === 'ALREADY_APPLIED' || err.status === 409) {
+    } catch (err: unknown) {
+      const error = err as { code?: string; status?: number; detail?: string };
+      if (error.code === 'ALREADY_APPLIED' || error.status === 409) {
         setErrorMsg('RÀNG BUỘC NGHIỆP VỤ (409): Bạn đã ứng tuyển vào vị trí này rồi. Hệ thống chặn nộp trùng lặp.');
       } else {
-        setErrorMsg(err.detail || 'Không thể gửi đơn ứng tuyển. Vui lòng thử lại.');
+        setErrorMsg(error.detail || 'Không thể gửi đơn ứng tuyển. Vui lòng thử lại.');
       }
     } finally {
       setIsApplying(false);

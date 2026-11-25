@@ -45,6 +45,42 @@ const NEXT_ALLOWED: Record<string, string[]> = {
   WITHDRAWN: [],
 };
 
+interface NoteItem {
+  id: string;
+  body: string;
+  author?: { fullName?: string; email?: string };
+  createdAt: string;
+}
+
+interface HistoryItem {
+  id?: string;
+  toStatus: string;
+  fromStatus?: string;
+  reason?: string;
+  createdAt: string;
+  actor?: { fullName?: string; email?: string };
+}
+
+interface ApplicantCandidate {
+  fullName: string;
+  headline?: string | null;
+  location?: string | null;
+  yearsExperience?: number | null;
+  summary?: string | null;
+}
+
+interface ApplicantDetail {
+  id: string;
+  status: string;
+  candidate: ApplicantCandidate;
+  job?: {
+    id?: string;
+    title: string;
+  };
+  notes?: NoteItem[];
+  history?: HistoryItem[];
+}
+
 export function ApplicantDetailDrawer({
   applicationId,
   isOpen,
@@ -56,7 +92,7 @@ export function ApplicantDetailDrawer({
   onClose: () => void;
   onStatusUpdated: () => void;
 }) {
-  const [app, setApp] = useState<any>(null);
+  const [app, setApp] = useState<ApplicantDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,7 +112,7 @@ export function ApplicantDetailDrawer({
     if (!applicationId) return;
     setLoading(true);
     setError(null);
-    fetchApi(`/recruiter/applications/${applicationId}`)
+    fetchApi<ApplicantDetail>(`/recruiter/applications/${applicationId}`)
       .then((data) => {
         setApp(data);
         const allowed = NEXT_ALLOWED[data.status] || [];
@@ -87,7 +123,7 @@ export function ApplicantDetailDrawer({
         }
       })
       .catch((err) => {
-        setError(err.detail || 'Không thể tải chi tiết ứng viên (Lỗi truy cập)');
+        setError((err as { detail?: string })?.detail || 'Không thể tải chi tiết ứng viên (Lỗi truy cập)');
       })
       .finally(() => {
         setLoading(false);
@@ -116,8 +152,8 @@ export function ApplicantDetailDrawer({
       setTransitionReason('');
       loadData();
       onStatusUpdated();
-    } catch (err: any) {
-      alert(err.detail || 'Lỗi khi chuyển trạng thái');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Lỗi khi chuyển trạng thái');
     } finally {
       setIsTransitioning(false);
     }
@@ -134,8 +170,8 @@ export function ApplicantDetailDrawer({
       });
       setNoteBody('');
       loadData();
-    } catch (err: any) {
-      alert(err.detail || 'Lỗi khi thêm ghi chú');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Lỗi khi thêm ghi chú');
     } finally {
       setIsAddingNote(false);
     }
@@ -147,8 +183,8 @@ export function ApplicantDetailDrawer({
         `/recruiter/applications/${applicationId}/resume`
       );
       window.open(res.downloadUrl, '_blank');
-    } catch (err: any) {
-      alert(err.detail || 'Không thể tải CV');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Không thể tải CV');
     }
   };
 
@@ -156,16 +192,21 @@ export function ApplicantDetailDrawer({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/70 backdrop-blur-md flex justify-end animate-in fade-in duration-200">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="applicant-drawer-title"
+        className="fixed inset-0 z-50 overflow-hidden bg-slate-950/70 backdrop-blur-md flex justify-end animate-in fade-in duration-200"
+      >
         <div className="w-full max-w-2xl bg-white dark:bg-[#0C101A] h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-white/[0.08] animate-in slide-in-from-right duration-200">
           {/* Top Bar */}
           <div className="p-5 sm:p-6 border-b border-slate-200/80 dark:border-white/[0.08] flex items-center justify-between bg-slate-50/80 dark:bg-white/[0.02]">
             <div className="flex items-center space-x-3.5">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/20">
-                <User className="w-5 h-5" />
+                <User className="w-5 h-5" aria-hidden="true" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                <h3 id="applicant-drawer-title" className="text-base font-bold text-slate-900 dark:text-white">
                   Hồ sơ Ứng viên Tuyển dụng
                 </h3>
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
@@ -174,10 +215,12 @@ export function ApplicantDetailDrawer({
               </div>
             </div>
             <button
+              type="button"
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.08] transition"
+              aria-label="Đóng chi tiết ứng viên"
+              className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.08] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
 
@@ -323,7 +366,7 @@ export function ApplicantDetailDrawer({
                   </form>
 
                   <div className="space-y-2.5 max-h-48 overflow-y-auto">
-                    {app.notes?.map((n: any) => (
+                    {app.notes?.map((n: NoteItem) => (
                       <div
                         key={n.id}
                         className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.06] text-xs"
@@ -355,7 +398,7 @@ export function ApplicantDetailDrawer({
                   </h3>
 
                   <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-white/[0.1]">
-                    {app.history?.map((h: any, idx: number) => (
+                    {app.history?.map((h: HistoryItem, idx: number) => (
                       <div key={h.id || idx} className="relative text-xs">
                         <span className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-white dark:ring-slate-900" />
                         <div className="font-bold text-slate-900 dark:text-white flex items-center space-x-2">

@@ -1,3 +1,6 @@
+> ⚠️ **Tài liệu do AI tạo, chưa được đo hay kiểm chứng.** Các số liệu, điểm số và benchmark dưới đây không có test
+> hay phép đo nào chứng minh. Đánh giá hiện hành: `../scorecard_and_upgrade_plan.md` (thư mục gốc self_project).
+
 # BẢN ĐÁNH GIÁ KỸ THUẬT & BENCHMARK CHUYÊN SÂU - PJ5
 ## Hệ Thống Cổng Thông Tin Tuyển Dụng & Theo Dõi Ứng Viên (Job Portal & Application Tracker - CareerVanguard)
 

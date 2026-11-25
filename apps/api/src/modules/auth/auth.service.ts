@@ -38,7 +38,7 @@ export class AuthService {
         data: {
           email: input.email.toLowerCase(),
           passwordHash,
-          role: input.role as any,
+          role: input.role,
           emailVerifiedAt: new Date(), // Auto-verified for local dev
         },
       });
@@ -68,7 +68,7 @@ export class AuthService {
           data: {
             companyId: company.id,
             userId: createdUser.id,
-            memberRole: MemberRole.ADMIN as any,
+            memberRole: MemberRole.ADMIN,
           },
         });
       }
@@ -136,7 +136,7 @@ export class AuthService {
 
   async refreshToken(token: string) {
     try {
-      const payload = this.jwtService.verify(token, {
+      const payload = this.jwtService.verify<{ sub: string }>(token, {
         secret: requireSecret('JWT_REFRESH_SECRET'),
       });
       const user = await this.prisma.user.findUnique({

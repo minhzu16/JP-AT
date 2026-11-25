@@ -16,13 +16,42 @@ import {
 import { fetchApi } from '../lib/api';
 import { formatSalary } from './JobCard';
 
+interface AppHistoryItem {
+  id: string;
+  toStatus: string;
+  changedAt: string;
+}
+
+interface ApplicationInterview {
+  round: number;
+  scheduledAt: string;
+  mode: string;
+  locationOrLink: string;
+}
+
+interface ApplicationJob {
+  title: string;
+  location: string;
+  company: {
+    name: string;
+  };
+}
+
+interface ApplicationItem {
+  id: string;
+  status: string;
+  job: ApplicationJob;
+  interviews?: ApplicationInterview[];
+  history?: AppHistoryItem[];
+}
+
 export function MyApplicationsView() {
-  const [applications, setApplications] = useState<any[]>([]);
+  const [applications, setApplications] = useState<ApplicationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = () => {
     setLoading(true);
-    fetchApi<any[]>('/me/applications')
+    fetchApi<ApplicationItem[]>('/me/applications')
       .then((data) => setApplications(data || []))
       .catch(() => setApplications([]))
       .finally(() => setLoading(false));
@@ -39,8 +68,8 @@ export function MyApplicationsView() {
     try {
       await fetchApi(`/me/applications/${applicationId}/withdraw`, { method: 'POST' });
       loadData();
-    } catch (err: any) {
-      alert(err.detail || 'Không thể rút đơn');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Không thể rút đơn');
     }
   };
 
@@ -107,7 +136,7 @@ export function MyApplicationsView() {
               </div>
 
               {/* Scheduled Interview Alert */}
-              {app.interviews?.length > 0 && (
+              {app.interviews && app.interviews.length > 0 && (
                 <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 space-y-1">
                   <div className="font-bold flex items-center">
                     <Calendar className="w-4 h-4 mr-1.5 text-emerald-600" />
@@ -128,7 +157,7 @@ export function MyApplicationsView() {
                   Tiến trình xét duyệt hồ sơ
                 </span>
                 <div className="flex flex-wrap items-center gap-2 text-xs">
-                  {app.history?.map((h: any, idx: number) => (
+                  {app.history?.map((h: AppHistoryItem, idx: number) => (
                     <React.Fragment key={h.id}>
                       <div className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">
                         <span className="font-bold">{h.toStatus}</span>
@@ -136,7 +165,7 @@ export function MyApplicationsView() {
                           {new Date(h.changedAt).toLocaleDateString('vi-VN')}
                         </span>
                       </div>
-                      {idx < app.history.length - 1 && (
+                      {idx < (app.history?.length ?? 0) - 1 && (
                         <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                       )}
                     </React.Fragment>

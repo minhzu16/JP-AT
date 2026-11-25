@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { throttlerOptions } from './common/throttle.config';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -12,10 +15,12 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { InterviewsModule } from './modules/interviews/interviews.module';
 import { MatchingModule } from './modules/matching/matching.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
 import { AppController } from './app.controller';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot(throttlerOptions(Number(process.env.THROTTLE_LIMIT_PER_MINUTE ?? 300))),
     PrismaModule,
     AuditModule,
     AuthModule,
@@ -29,7 +34,9 @@ import { AppController } from './app.controller';
     InterviewsModule,
     MatchingModule,
     AdminModule,
+    MetricsModule,
   ],
   controllers: [AppController],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

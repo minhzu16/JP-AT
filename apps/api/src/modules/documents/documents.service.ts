@@ -68,7 +68,7 @@ export class DocumentsService {
       const doc = await tx.document.create({
         data: {
           ownerId: candidate.id,
-          kind: input.kind as any,
+          kind: input.kind,
           originalFilename: input.originalFilename,
           mimeType: input.mimeType,
           sizeBytes: input.sizeBytes,

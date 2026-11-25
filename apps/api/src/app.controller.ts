@@ -1,6 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { PrismaService } from './prisma/prisma.service';
 
+@SkipThrottle()
 @Controller()
 export class AppController {
   constructor(private prisma: PrismaService) {}
@@ -24,11 +26,11 @@ export class AppController {
         database: 'connected',
         timestamp: new Date().toISOString(),
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
       return {
         status: 'not_ready',
         database: 'error',
-        error: err.message,
+        error: err instanceof Error ? err.message : String(err),
       };
     }
   }

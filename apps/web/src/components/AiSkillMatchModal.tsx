@@ -15,6 +15,30 @@ import {
 } from 'lucide-react';
 import { fetchApi } from '../lib/api';
 
+interface SkillItem {
+  name: string;
+  isRequired?: boolean;
+}
+
+interface SkillMatchBreakdown {
+  hasAllRequired?: boolean;
+  matched?: SkillItem[];
+  missingRequired?: SkillItem[];
+}
+
+interface SkillMatchData {
+  score: number;
+  job?: {
+    id?: string;
+    title: string;
+  };
+  breakdown?: SkillMatchBreakdown;
+}
+
+interface AiFeedbackData {
+  suggestions?: string[];
+}
+
 export function AiSkillMatchModal({
   jobId,
   jobTitle,
@@ -27,8 +51,8 @@ export function AiSkillMatchModal({
   onClose: () => void;
 }) {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any>(null);
-  const [feedbackData, setFeedbackData] = useState<any>(null);
+  const [data, setData] = useState<SkillMatchData | null>(null);
+  const [feedbackData, setFeedbackData] = useState<AiFeedbackData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,15 +60,15 @@ export function AiSkillMatchModal({
       setLoading(true);
       setError(null);
       Promise.all([
-        fetchApi(`/matching/compare/${jobId}`),
-        fetchApi(`/matching/ai-feedback/${jobId}`, { method: 'POST' }),
+        fetchApi<SkillMatchData>(`/matching/compare/${jobId}`),
+        fetchApi<AiFeedbackData>(`/matching/ai-feedback/${jobId}`, { method: 'POST' }),
       ])
         .then(([compareRes, feedbackRes]) => {
           setData(compareRes);
           setFeedbackData(feedbackRes);
         })
         .catch((err) => {
-          setError(err.detail || 'Không thể tính toán so khớp kỹ năng lúc này.');
+          setError((err as { detail?: string })?.detail || 'Không thể tính toán so khớp kỹ năng lúc này.');
         })
         .finally(() => {
           setLoading(false);
@@ -175,7 +199,7 @@ export function AiSkillMatchModal({
                   </h4>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {data?.breakdown?.matched?.map((m: any, idx: number) => (
+                  {data?.breakdown?.matched?.map((m: SkillItem, idx: number) => (
                     <span
                       key={idx}
                       className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60 text-xs font-medium flex items-center space-x-1.5 shadow-2xs"
@@ -197,7 +221,7 @@ export function AiSkillMatchModal({
               </div>
 
               {/* Missing Required Skills */}
-              {data?.breakdown?.missingRequired?.length > 0 && (
+              {data?.breakdown?.missingRequired && data.breakdown.missingRequired.length > 0 && (
                 <div>
                   <div className="flex items-center space-x-2 mb-2.5">
                     <AlertTriangle className="w-4 h-4 text-amber-500" />
@@ -206,7 +230,7 @@ export function AiSkillMatchModal({
                     </h4>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {data.breakdown.missingRequired.map((m: any, idx: number) => (
+                    {data.breakdown.missingRequired.map((m: SkillItem, idx: number) => (
                       <span
                         key={idx}
                         className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 text-xs font-medium"

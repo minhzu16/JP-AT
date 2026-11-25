@@ -124,18 +124,21 @@ export function JobCard({
 
         {user?.role === 'CANDIDATE' && (
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onToggleSave(job.id, isSaved);
             }}
-            className={`p-2 rounded-xl border transition-all shrink-0 ${
+            aria-pressed={isSaved}
+            aria-label={isSaved ? `Bỏ lưu việc làm ${job.title}` : `Lưu việc làm ${job.title}`}
+            className={`p-2 rounded-xl border transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
               isSaved
                 ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300/80 dark:border-amber-700/60 text-amber-600 dark:text-amber-400 shadow-sm'
                 : 'bg-transparent border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.08]'
             }`}
             title={isSaved ? 'Bỏ lưu' : 'Lưu tin tuyển dụng'}
           >
-            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
+            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} aria-hidden="true" />
           </button>
         )}
       </div>

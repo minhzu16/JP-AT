@@ -29,7 +29,7 @@ export class CandidatesController {
   @Roles(Role.CANDIDATE)
   async updateProfile(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = CandidateProfileUpdateSchema.safeParse(body);
     if (!parsed.success) {
@@ -45,7 +45,7 @@ export class CandidatesController {
   @Roles(Role.CANDIDATE)
   async updateSkills(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = CandidateSkillsUpdateSchema.safeParse(body);
     if (!parsed.success) {

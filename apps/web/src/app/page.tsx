@@ -29,6 +29,21 @@ import {
   RotateCcw,
 } from 'lucide-react';
 
+interface SkillItem {
+  id: string;
+  name: string;
+}
+
+interface SavedJobRef {
+  jobId: string;
+}
+
+interface CandidateApplicationSummary {
+  id: string;
+  jobId: string;
+  status: string;
+}
+
 export default function HomePage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('jobs');
@@ -42,9 +57,9 @@ export default function HomePage() {
 
   // Data state
   const [jobs, setJobs] = useState<JobItem[]>([]);
-  const [skills, setSkills] = useState<any[]>([]);
+  const [skills, setSkills] = useState<SkillItem[]>([]);
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
-  const [myApplications, setMyApplications] = useState<any[]>([]);
+  const [myApplications, setMyApplications] = useState<CandidateApplicationSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Selected job for Workstation Dual-Pane inspection
@@ -96,7 +111,7 @@ export default function HomePage() {
   }, [fetchJobs]);
 
   useEffect(() => {
-    fetchApi<any[]>('/skills')
+    fetchApi<SkillItem[]>('/skills')
       .then((data) => setSkills(data || []))
       .catch(() => {});
   }, []);
@@ -104,13 +119,13 @@ export default function HomePage() {
   // Fetch candidate metadata (saved jobs and applications)
   const refreshCandidateData = useCallback(() => {
     if (user?.role === 'CANDIDATE') {
-      fetchApi<any[]>('/me/saved-jobs')
+      fetchApi<SavedJobRef[]>('/me/saved-jobs')
         .then((data) => {
           setSavedJobIds(new Set((data || []).map((s) => s.jobId)));
         })
         .catch(() => {});
 
-      fetchApi<any[]>('/me/applications')
+      fetchApi<CandidateApplicationSummary[]>('/me/applications')
         .then((data) => {
           setMyApplications(data || []);
         })
@@ -138,8 +153,8 @@ export default function HomePage() {
         await fetchApi(`/me/saved-jobs/${jobId}`, { method: 'PUT' });
         setSavedJobIds((prev) => new Set(prev).add(jobId));
       }
-    } catch (err: any) {
-      alert(err.detail || 'Lỗi khi lưu việc');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Lỗi khi lưu việc');
     }
   };
 

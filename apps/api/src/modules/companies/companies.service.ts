@@ -38,7 +38,7 @@ export class CompaniesService {
     return company;
   }
 
-  async update(companyId: string, userId: string, data: any) {
+  async update(companyId: string, userId: string, data: Record<string, unknown>) {
     const membership = await this.prisma.companyMember.findUnique({
       where: {
         companyId_userId: { companyId, userId },

@@ -6,8 +6,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {}
 
 @Injectable()
 export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
-  handleRequest(err: any, user: any) {
+  handleRequest<TUser = unknown>(err: unknown, user: unknown): TUser {
     // If not authenticated, return null instead of throwing 401
-    return user || null;
+    return (user || null) as TUser;
   }
 }

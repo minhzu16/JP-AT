@@ -32,7 +32,7 @@ export class ApplicationsController {
   async apply(
     @Param('jobId') jobId: string,
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = ApplicationCreateSchema.safeParse({ ...body, jobId });
     if (!parsed.success) {
@@ -91,7 +91,7 @@ export class ApplicationsController {
   async transitionStatus(
     @Param('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = ApplicationTransitionSchema.safeParse(body);
     if (!parsed.success) {
@@ -109,7 +109,7 @@ export class ApplicationsController {
   async addNote(
     @Param('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = ApplicationNoteSchema.safeParse(body);
     if (!parsed.success) {

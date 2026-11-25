@@ -44,7 +44,7 @@ export class InterviewsService {
           round: input.round,
           scheduledAt: new Date(input.scheduledAt),
           durationMin: input.durationMin,
-          mode: input.mode as any,
+          mode: input.mode,
           locationOrLink: input.locationOrLink,
           interviewerNames: input.interviewerNames,
         },
@@ -113,7 +113,7 @@ export class InterviewsService {
     return this.prisma.interview.update({
       where: { id: interviewId },
       data: {
-        ...(input.status ? { status: input.status as any } : {}),
+        ...(input.status ? { status: input.status } : {}),
         ...(input.feedback !== undefined ? { feedback: input.feedback } : {}),
         ...(input.outcome !== undefined ? { outcome: input.outcome } : {}),
         ...(input.scheduledAt ? { scheduledAt: new Date(input.scheduledAt) } : {}),

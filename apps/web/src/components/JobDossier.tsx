@@ -27,6 +27,12 @@ import { JobItem, formatSalary } from './JobCard';
 import { useAuth } from '../lib/auth-context';
 import { fetchApi } from '../lib/api';
 
+interface ResumeDocument {
+  id: string;
+  originalFilename: string;
+  isDefault: boolean;
+}
+
 export function JobDossier({
   job,
   hasApplied,
@@ -47,7 +53,7 @@ export function JobDossier({
   onBackToList?: () => void;
 }) {
   const { user } = useAuth();
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<ResumeDocument[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<string>('');
   const [coverLetter, setCoverLetter] = useState('');
   const [isApplying, setIsApplying] = useState(false);
@@ -58,7 +64,7 @@ export function JobDossier({
 
   useEffect(() => {
     if (job && user?.role === 'CANDIDATE') {
-      fetchApi<any[]>('/me/documents')
+      fetchApi<ResumeDocument[]>('/me/documents')
         .then((docs) => {
           setDocuments(docs || []);
           const def = docs.find((d) => d.isDefault);
@@ -111,11 +117,12 @@ export function JobDossier({
       setSuccessMsg('Nộp đơn ứng tuyển thành công! Hồ sơ đã được chuyển tiếp vào hệ thống ATS tuyển dụng.');
       setShowApplyTray(false);
       onApplySuccess();
-    } catch (err: any) {
-      if (err.code === 'ALREADY_APPLIED' || err.status === 409) {
+    } catch (err: unknown) {
+      const error = err as { code?: string; status?: number; detail?: string };
+      if (error.code === 'ALREADY_APPLIED' || error.status === 409) {
         setErrorMsg('Bạn đã nộp đơn cho vị trí này. Hệ thống đã lưu trữ bản ghi trước đó.');
       } else {
-        setErrorMsg(err.detail || 'Không thể gửi đơn ứng tuyển. Vui lòng thử lại.');
+        setErrorMsg(error.detail || 'Không thể gửi đơn ứng tuyển. Vui lòng thử lại.');
       }
     } finally {
       setIsApplying(false);

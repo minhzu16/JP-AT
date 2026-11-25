@@ -30,7 +30,7 @@ export class DocumentsController {
   @Roles(Role.CANDIDATE)
   async getUploadUrl(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = PresignedUploadRequestSchema.safeParse(body);
     if (!parsed.success) {
@@ -46,7 +46,7 @@ export class DocumentsController {
   @Roles(Role.CANDIDATE)
   async confirmDocument(
     @CurrentUser() user: AuthenticatedUser,
-    @Body() body: any
+    @Body() body: Record<string, unknown>
   ) {
     const parsed = DocumentConfirmSchema.safeParse(body);
     if (!parsed.success) {

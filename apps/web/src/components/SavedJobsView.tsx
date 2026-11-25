@@ -3,19 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import { Bookmark, Building, MapPin, DollarSign, Trash2 } from 'lucide-react';
 import { fetchApi } from '../lib/api';
-import { formatSalary } from './JobCard';
+import { formatSalary, JobItem } from './JobCard';
+
+interface SavedJobEntry {
+  jobId: string;
+  job: JobItem;
+}
 
 export function SavedJobsView({
   onSelectJob,
 }: {
-  onSelectJob: (job: any) => void;
+  onSelectJob: (job: JobItem) => void;
 }) {
-  const [saved, setSaved] = useState<any[]>([]);
+  const [saved, setSaved] = useState<SavedJobEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = () => {
     setLoading(true);
-    fetchApi<any[]>('/me/saved-jobs')
+    fetchApi<SavedJobEntry[]>('/me/saved-jobs')
       .then((data) => setSaved(data || []))
       .catch(() => setSaved([]))
       .finally(() => setLoading(false));
@@ -29,8 +34,8 @@ export function SavedJobsView({
     try {
       await fetchApi(`/me/saved-jobs/${jobId}`, { method: 'DELETE' });
       setSaved((prev) => prev.filter((s) => s.jobId !== jobId));
-    } catch (err: any) {
-      alert(err.detail || 'Không thể bỏ lưu');
+    } catch (err: unknown) {
+      alert((err as { detail?: string })?.detail || 'Không thể bỏ lưu');
     }
   };
 

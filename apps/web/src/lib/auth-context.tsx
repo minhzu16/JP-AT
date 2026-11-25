@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { fetchApi } from './api';
+import { fetchApi, setToken as setApiToken, silentRefreshToken } from './api';
 
 export interface UserProfile {
   id: string;
@@ -77,8 +77,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('jobportal_token');
+  const logout = useCallback(async () => {
+    try {
+      await fetchApi('/auth/logout', { method: 'POST' });
+    } catch {
+      // Ignore
+    }
+    if (typeof window !== 'undefined') {
+      delete localStorage['jobportal_has_session'];
+      localStorage.removeItem('jobportal_has_session');
+    }
+    setApiToken(null);
     setToken(null);
     setUser(null);
   }, []);
@@ -89,9 +98,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
       });
       setUser(data);
-    } catch {
+    } catch (err: any) {
+      if (err?.status === 401 || err?.status === 403) {
+        if (typeof window !== 'undefined') {
+          delete localStorage['jobportal_has_session'];
+          localStorage.removeItem('jobportal_has_session');
+        }
+      }
       setUser(null);
-      localStorage.removeItem('jobportal_token');
+      setApiToken(null);
       setToken(null);
     } finally {
       setIsLoading(false);
@@ -105,7 +120,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
-      localStorage.setItem('jobportal_token', res.accessToken);
+      if (typeof window !== 'undefined') {
+        localStorage['jobportal_has_session'] = '1';
+      }
+      setApiToken(res.accessToken);
       setToken(res.accessToken);
       await fetchCurrentUser(res.accessToken);
     } finally {
@@ -115,7 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const switchDemoAccount = useCallback(async (accountKey: string) => {
     if (accountKey === 'GUEST') {
-      logout();
+      await logout();
       return;
     }
     const acc = DEMO_ACCOUNTS.find((a) => a.key === accountKey);
@@ -125,14 +143,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [login, logout]);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('jobportal_token');
-    if (savedToken) {
-      setToken(savedToken);
-      fetchCurrentUser(savedToken);
-    } else {
-      switchDemoAccount('CANDIDATE_1');
+    const hasSession =
+      typeof window !== 'undefined' &&
+      localStorage['jobportal_has_session'] === '1';
+
+    if (!hasSession) {
+      setIsLoading(false);
+      return;
     }
-  }, [fetchCurrentUser, switchDemoAccount]);
+
+    silentRefreshToken()
+      .then((restoredToken) => {
+        if (restoredToken) {
+          if (typeof window !== 'undefined') {
+            localStorage['jobportal_has_session'] = '1';
+          }
+          setToken(restoredToken);
+          fetchCurrentUser(restoredToken);
+        } else {
+          if (typeof window !== 'undefined') {
+            delete localStorage['jobportal_has_session'];
+            localStorage.removeItem('jobportal_has_session');
+          }
+          setUser(null);
+          setToken(null);
+          setIsLoading(false);
+        }
+      })
+      .catch((err: any) => {
+        if (err?.status === 401 || err?.status === 403 || !err?.status) {
+          if (typeof window !== 'undefined') {
+            delete localStorage['jobportal_has_session'];
+            localStorage.removeItem('jobportal_has_session');
+          }
+        }
+        setUser(null);
+        setToken(null);
+        setIsLoading(false);
+      });
+  }, [fetchCurrentUser]);
 
   const refreshMe = useCallback(async () => {
     if (token) {

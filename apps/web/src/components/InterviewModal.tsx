@@ -56,8 +56,8 @@ export function InterviewModal({
 
       onSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err.detail || 'Không thể tạo lịch phỏng vấn');
+    } catch (err: unknown) {
+      setError((err as { detail?: string })?.detail || 'Không thể tạo lịch phỏng vấn');
     } finally {
       setLoading(false);
     }

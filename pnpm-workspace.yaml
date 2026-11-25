@@ -11,3 +11,14 @@ allowBuilds:
   '@scarf/scarf': true
   sharp: true
   unrs-resolver: true
+
+# Security floors for transitive deps flagged by `pnpm audit` (capped to the current major).
+overrides:
+  multer: '>=2.5.0 <3'
+  lodash: '>=4.17.24 <5'
+  js-yaml@>=4 <4.3.2: '>=4.3.2 <5'
+  postcss@>=8 <8.5.18: '>=8.5.18 <9'
+  sharp@>=0.33 <0.35.5: '>=0.35.5 <0.36'
+  effect: '>=3.22.1 <4'
+  deepmerge-ts: '>=8.0.0 <9'
+  body-parser@<1.20.9: '>=1.20.9 <2'

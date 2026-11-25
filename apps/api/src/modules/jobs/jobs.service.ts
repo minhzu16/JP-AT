@@ -22,7 +22,7 @@ export class JobsService {
 
   async searchJobs(query: JobFilterQuery) {
     const limit = Math.min(query.limit || 20, 100);
-    const where: any = {
+    const where: Record<string, unknown> = {
       status: JobStatus.PUBLISHED,
     };
 
