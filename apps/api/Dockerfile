@@ -37,7 +37,6 @@ COPY packages/db/prisma packages/db/prisma
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --prod
 COPY --from=build /repo/node_modules/.pnpm /repo/node_modules/.pnpm
-COPY --from=build /repo/node_modules/@prisma /repo/node_modules/@prisma
 
 # ── 3. runtime stage ──
 FROM base AS runtime
