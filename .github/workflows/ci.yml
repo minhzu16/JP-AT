@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: ["main", "master", "security/p0"]
   pull_request:
     branches: ["main", "master"]
 
@@ -58,7 +58,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
@@ -86,15 +86,19 @@ jobs:
         run: pnpm build
 
       - name: Run Tests with Coverage
-        run: pnpm --filter @jobportal/api test:coverage | tee coverage-summary.txt
+        run: |
+          set -o pipefail
+          pnpm --filter @jobportal/api test:coverage | tee coverage-summary.txt
 
       - name: Publish Coverage Summary
         if: always()
         run: |
-          echo "### Test Coverage - @jobportal/api" >> "$GITHUB_STEP_SUMMARY"
-          echo '```text' >> "$GITHUB_STEP_SUMMARY"
-          tail -n 25 coverage-summary.txt >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Test Coverage - @jobportal/api"
+            echo '```text'
+            tail -n 25 coverage-summary.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   docker-build:
     name: Build Docker Images
