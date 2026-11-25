@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from '../components/Navbar';
-import { JobCard, JobItem } from '../components/JobCard';
-import { JobDossier } from '../components/JobDossier';
+import { JobItem } from '../components/JobCard';
 import { JobDetailModal } from '../components/JobDetailModal';
 import { AiSkillMatchModal } from '../components/AiSkillMatchModal';
 import { KanbanBoard } from '../components/KanbanBoard';
@@ -12,22 +11,11 @@ import { SavedJobsView } from '../components/SavedJobsView';
 import { ResumeManagerView } from '../components/ResumeManagerView';
 import { RecruiterJobsView } from '../components/RecruiterJobsView';
 import { AdminDashboardView } from '../components/AdminDashboardView';
+import { JobFilterBar } from '../components/home/JobFilterBar';
+import { JobWorkstationPane } from '../components/home/JobWorkstationPane';
+import { AiMatchingTab } from '../components/home/AiMatchingTab';
 import { useAuth } from '../lib/auth-context';
 import { fetchApi } from '../lib/api';
-import {
-  Search,
-  MapPin,
-  Filter,
-  Sparkles,
-  Briefcase,
-  Building,
-  CheckCircle2,
-  TrendingUp,
-  ShieldCheck,
-  ChevronRight,
-  SlidersHorizontal,
-  RotateCcw,
-} from 'lucide-react';
 
 interface SkillItem {
   id: string;
@@ -48,33 +36,27 @@ export default function HomePage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('jobs');
 
-  // Search & Filter state
   const [keyword, setKeyword] = useState('');
   const [location, setLocation] = useState('');
   const [workMode, setWorkMode] = useState('');
   const [level, setLevel] = useState('');
   const [selectedSkillId, setSelectedSkillId] = useState('');
 
-  // Data state
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [skills, setSkills] = useState<SkillItem[]>([]);
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
   const [myApplications, setMyApplications] = useState<CandidateApplicationSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Selected job for Workstation Dual-Pane inspection
   const [selectedJob, setSelectedJob] = useState<JobItem | null>(null);
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
 
-  // Fallback modal state (e.g., from Saved Jobs)
   const [modalJob, setModalJob] = useState<JobItem | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // AI Match modal state
   const [aiMatchJob, setAiMatchJob] = useState<JobItem | null>(null);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
-  // Fetch jobs and skills
   const fetchJobs = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -88,7 +70,6 @@ export default function HomePage() {
       .then((res) => {
         const items = res.items || [];
         setJobs(items);
-        // Default select first job in workstation view if none selected or if selected is not in items
         if (items.length > 0) {
           setSelectedJob((prev) => {
             if (!prev) return items[0];
@@ -116,19 +97,14 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
-  // Fetch candidate metadata (saved jobs and applications)
   const refreshCandidateData = useCallback(() => {
     if (user?.role === 'CANDIDATE') {
       fetchApi<SavedJobRef[]>('/me/saved-jobs')
-        .then((data) => {
-          setSavedJobIds(new Set((data || []).map((s) => s.jobId)));
-        })
+        .then((data) => setSavedJobIds(new Set((data || []).map((s) => s.jobId))))
         .catch(() => {});
 
       fetchApi<CandidateApplicationSummary[]>('/me/applications')
-        .then((data) => {
-          setMyApplications(data || []);
-        })
+        .then((data) => setMyApplications(data || []))
         .catch(() => {});
     } else {
       setSavedJobIds(new Set());
@@ -172,119 +148,27 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-obsidian-base">
-      {/* Precision Navbar */}
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* TAB 1: DUAL-PANE WORKSTATION - PUBLIC JOB DISCOVERY */}
         {activeTab === 'jobs' && (
           <div className="space-y-6">
-            {/* Command & Filter Bar */}
-            <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-obsidian-surface/90 backdrop-blur-xl p-5 shadow-sm">
-              <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3.5">
-                {/* Search input with Spotlight focus */}
-                <div className="flex-1 flex items-center px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
-                  <Search className="w-4 h-4 text-slate-400 shrink-0 mr-3" />
-                  <input
-                    type="text"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                    placeholder="Tìm kiếm vị trí kỹ thuật, công nghệ (React, NestJS, Go, Kubernetes, Rust)..."
-                    className="w-full text-xs sm:text-sm bg-transparent border-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
-                  />
-                  {keyword && (
-                    <button
-                      onClick={() => setKeyword('')}
-                      className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-1"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
+            <JobFilterBar
+              keyword={keyword}
+              location={location}
+              workMode={workMode}
+              level={level}
+              selectedSkillId={selectedSkillId}
+              skills={skills}
+              hasActiveFilters={hasActiveFilters}
+              onKeywordChange={setKeyword}
+              onLocationChange={setLocation}
+              onWorkModeChange={setWorkMode}
+              onLevelChange={setLevel}
+              onSelectSkill={setSelectedSkillId}
+              onClearFilters={handleClearFilters}
+            />
 
-                {/* Filters Row */}
-                <div className="flex flex-wrap items-center gap-2.5">
-                  {/* Location dropdown */}
-                  <div className="flex items-center px-3 py-2 rounded-2xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 text-xs">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 mr-2 shrink-0" />
-                    <select
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className="bg-transparent border-none text-slate-800 dark:text-slate-200 focus:outline-none text-xs font-medium cursor-pointer"
-                    >
-                      <option value="">Tất cả địa điểm</option>
-                      <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-                      <option value="Hà Nội">Hà Nội</option>
-                      <option value="Đà Nẵng">Đà Nẵng</option>
-                    </select>
-                  </div>
-
-                  {/* Work Mode */}
-                  <div className="flex items-center px-3 py-2 rounded-2xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 text-xs">
-                    <select
-                      value={workMode}
-                      onChange={(e) => setWorkMode(e.target.value)}
-                      className="bg-transparent border-none text-slate-800 dark:text-slate-200 focus:outline-none text-xs font-medium cursor-pointer"
-                    >
-                      <option value="">Hình thức</option>
-                      <option value="ONSITE">Onsite</option>
-                      <option value="HYBRID">Hybrid</option>
-                      <option value="REMOTE">Remote</option>
-                    </select>
-                  </div>
-
-                  {/* Level */}
-                  <div className="flex items-center px-3 py-2 rounded-2xl bg-slate-50 dark:bg-obsidian-card border border-slate-200 dark:border-slate-800 text-xs">
-                    <select
-                      value={level}
-                      onChange={(e) => setLevel(e.target.value)}
-                      className="bg-transparent border-none text-slate-800 dark:text-slate-200 focus:outline-none text-xs font-medium cursor-pointer"
-                    >
-                      <option value="">Cấp bậc</option>
-                      <option value="INTERN">Intern</option>
-                      <option value="JUNIOR">Junior</option>
-                      <option value="MID">Middle</option>
-                      <option value="SENIOR">Senior</option>
-                      <option value="LEAD">Lead</option>
-                    </select>
-                  </div>
-
-                  {hasActiveFilters && (
-                    <button
-                      onClick={handleClearFilters}
-                      className="px-3 py-2 rounded-2xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900 transition flex items-center space-x-1.5"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>Xóa lọc</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Skills Quick Chips */}
-              <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center gap-1.5 text-xs">
-                <span className="text-[11px] font-mono text-slate-400 mr-1.5 font-medium">Chuyên môn:</span>
-                {skills.slice(0, 10).map((s) => {
-                  const isSelected = selectedSkillId === s.id;
-                  return (
-                    <button
-                      key={s.id}
-                      onClick={() => setSelectedSkillId(isSelected ? '' : s.id)}
-                      className={`px-3 py-1 rounded-xl text-[11px] font-semibold transition-all ${
-                        isSelected
-                          ? 'bg-blue-600 text-white shadow-xs'
-                          : 'bg-slate-100 dark:bg-obsidian-card text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-800'
-                      }`}
-                    >
-                      {s.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Workstation Header Info */}
             <div className="flex items-center justify-between text-xs px-1">
               <div className="flex items-center space-x-2">
                 <span className="font-semibold text-slate-900 dark:text-white">
@@ -300,88 +184,33 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* DUAL-PANE WORKSTATION LAYOUT */}
-            {loading ? (
-              <div className="py-24 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface text-center text-xs text-slate-400">
-                Đang nạp dữ liệu vị trí kỹ thuật...
-              </div>
-            ) : jobs.length === 0 ? (
-              <div className="p-16 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface text-center">
-                <Briefcase className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
-                <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                  Không tìm thấy tin tuyển dụng phù hợp
-                </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Thử xóa bớt bộ lọc hoặc tìm với từ khóa công nghệ khác.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                {/* LEFT PANE: High-density Job Cards List (~42% desktop width) */}
-                <div
-                  className={`lg:col-span-5 space-y-2.5 overflow-y-auto max-h-[calc(100vh-210px)] pr-1 ${
-                    mobileDetailOpen ? 'hidden lg:block' : 'block'
-                  }`}
-                >
-                  {jobs.map((job) => {
-                    const appliedApp = myApplications.find((a) => a.jobId === job.id);
-                    const isSelected = selectedJob?.id === job.id;
-                    return (
-                      <JobCard
-                        key={job.id}
-                        job={job}
-                        isSelected={isSelected}
-                        isSaved={savedJobIds.has(job.id)}
-                        hasApplied={!!appliedApp}
-                        appliedStatus={appliedApp?.status}
-                        onSelect={(j) => {
-                          setSelectedJob(j);
-                          setMobileDetailOpen(true);
-                        }}
-                        onToggleSave={handleToggleSave}
-                        onCheckAiMatch={(j) => {
-                          setAiMatchJob(j);
-                          setIsAiModalOpen(true);
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-
-                {/* RIGHT PANE: Sticky Job Dossier (~58% desktop width) */}
-                <div
-                  className={`lg:col-span-7 sticky top-20 ${
-                    mobileDetailOpen ? 'block' : 'hidden lg:block'
-                  }`}
-                >
-                  <JobDossier
-                    job={selectedJob}
-                    hasApplied={myApplications.some((a) => a.jobId === selectedJob?.id)}
-                    appliedStatus={
-                      myApplications.find((a) => a.jobId === selectedJob?.id)?.status
-                    }
-                    isSaved={Boolean(selectedJob && savedJobIds.has(selectedJob.id))}
-                    onToggleSave={handleToggleSave}
-                    onApplySuccess={() => {
-                      refreshCandidateData();
-                      fetchJobs();
-                    }}
-                    onOpenAiMatch={(j) => {
-                      setAiMatchJob(j);
-                      setIsAiModalOpen(true);
-                    }}
-                    onBackToList={() => setMobileDetailOpen(false)}
-                  />
-                </div>
-              </div>
-            )}
+            <JobWorkstationPane
+              loading={loading}
+              jobs={jobs}
+              selectedJob={selectedJob}
+              mobileDetailOpen={mobileDetailOpen}
+              savedJobIds={savedJobIds}
+              myApplications={myApplications}
+              onSelectJob={(j) => {
+                setSelectedJob(j);
+                setMobileDetailOpen(true);
+              }}
+              onToggleSave={handleToggleSave}
+              onCheckAiMatch={(j) => {
+                setAiMatchJob(j);
+                setIsAiModalOpen(true);
+              }}
+              onApplySuccess={() => {
+                refreshCandidateData();
+                fetchJobs();
+              }}
+              onBackToList={() => setMobileDetailOpen(false)}
+            />
           </div>
         )}
 
-        {/* TAB 2: CANDIDATE - MY APPLICATIONS */}
         {activeTab === 'my-applications' && <MyApplicationsView />}
 
-        {/* TAB 3: CANDIDATE - SAVED JOBS */}
         {activeTab === 'saved-jobs' && (
           <SavedJobsView
             onSelectJob={(j) => {
@@ -391,84 +220,27 @@ export default function HomePage() {
           />
         )}
 
-        {/* TAB 4: CANDIDATE - RESUME & PROFILE */}
         {activeTab === 'resumes' && <ResumeManagerView />}
 
-        {/* TAB 5: CANDIDATE - AI MATCHING */}
         {activeTab === 'ai-matching' && (
-          <div className="space-y-5">
-            <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-cobalt-600 text-white flex items-center justify-center">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                    So khớp Kỹ năng & Khuyến nghị Hồ sơ Khách quan (AI)
-                  </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Hệ thống đánh giá độ khớp theo mô hình STAR, loại trừ thiên lệch và tuân thủ chuẩn mực EU AI Act.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {jobs.map((job) => (
-                <div
-                  key={job.id}
-                  onClick={() => {
-                    setAiMatchJob(job);
-                    setIsAiModalOpen(true);
-                  }}
-                  className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-obsidian-surface p-4 cursor-pointer hover:border-cobalt-500 transition-all flex flex-col justify-between"
-                >
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white hover:text-cobalt-600">
-                      {job.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      {job.company.name}
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {job.skills.map((s) => (
-                        <span
-                          key={s.skill.id}
-                          className="px-1.5 py-0.5 rounded text-[11px] bg-slate-100 dark:bg-obsidian-card text-slate-600 dark:text-slate-400 font-medium"
-                        >
-                          {s.skill.name}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs font-semibold text-cobalt-600 dark:text-cobalt-400">
-                    <span>Xem báo cáo chẩn đoán</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 6: RECRUITER - ATS KANBAN PIPELINE */}
-        {activeTab === 'ats-pipeline' && <KanbanBoard />}
-
-        {/* TAB 7: RECRUITER - JOBS CRUD */}
-        {activeTab === 'recruiter-jobs' && (
-          <RecruiterJobsView
-            onSelectJobForATS={(jobId) => {
-              setActiveTab('ats-pipeline');
+          <AiMatchingTab
+            jobs={jobs}
+            onSelectJobForMatch={(job) => {
+              setAiMatchJob(job);
+              setIsAiModalOpen(true);
             }}
           />
         )}
 
-        {/* TAB 8: ADMIN - DASHBOARD & AUDIT */}
+        {activeTab === 'ats-pipeline' && <KanbanBoard />}
+
+        {activeTab === 'recruiter-jobs' && (
+          <RecruiterJobsView onSelectJobForATS={() => setActiveTab('ats-pipeline')} />
+        )}
+
         {activeTab === 'admin-dashboard' && <AdminDashboardView />}
       </main>
 
-      {/* Engineering Footer */}
       <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 py-6 bg-white dark:bg-obsidian-surface text-center text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="font-mono text-[11px]">
@@ -480,7 +252,6 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Fallback Modal for Saved Jobs or standalone view */}
       <JobDetailModal
         job={modalJob}
         isOpen={isDetailModalOpen}
@@ -497,7 +268,6 @@ export default function HomePage() {
         }}
       />
 
-      {/* AI Skill Matching Report Modal */}
       <AiSkillMatchModal
         jobId={aiMatchJob?.id || null}
         jobTitle={aiMatchJob?.title}

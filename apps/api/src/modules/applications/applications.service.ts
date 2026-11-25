@@ -19,6 +19,13 @@ import {
 } from '@jobportal/shared';
 import { Prisma } from '@jobportal/db';
 import { AuditService } from '../audit/audit.service';
+import {
+  CANDIDATE_APPLICATION_INCLUDE,
+  RECRUITER_APPLICATIONS_INCLUDE,
+  RECRUITER_APPLICATION_DETAIL_INCLUDE,
+  mapSkillsForMatching,
+  createApplicationInTx,
+} from './applications.queries';
 
 @Injectable()
 export class ApplicationsService {
@@ -34,41 +41,26 @@ export class ApplicationsService {
   async apply(userId: string, input: ApplicationCreateInput) {
     const candidate = await this.prisma.candidateProfile.findUnique({
       where: { userId },
-      include: {
-        skills: { include: { skill: true } },
-      },
+      include: { skills: { include: { skill: true } } },
     });
-
     if (!candidate) {
       throw new BadRequestException('Candidate profile does not exist. Please complete your profile first.');
     }
 
     const job = await this.prisma.job.findUnique({
       where: { id: input.jobId },
-      include: {
-        skills: { include: { skill: true } },
-        company: true,
-      },
+      include: { skills: { include: { skill: true } }, company: true },
     });
-
     if (!job || job.status !== JobStatus.PUBLISHED) {
       throw new BadRequestException('This job is no longer accepting applications.');
     }
-
     if (job.expiresAt && new Date(job.expiresAt) < new Date()) {
       throw new BadRequestException('This job posting has expired.');
     }
 
-    // Check pre-existing application
     const existing = await this.prisma.application.findUnique({
-      where: {
-        jobId_candidateId: {
-          jobId: input.jobId,
-          candidateId: candidate.id,
-        },
-      },
+      where: { jobId_candidateId: { jobId: input.jobId, candidateId: candidate.id } },
     });
-
     if (existing) {
       throw new ConflictException({
         code: 'ALREADY_APPLIED',
@@ -76,69 +68,30 @@ export class ApplicationsService {
       });
     }
 
-    // Default resume if none provided
     let resumeId = input.resumeDocumentId;
     if (!resumeId) {
       const defaultDoc = await this.prisma.document.findFirst({
-        where: {
-          ownerId: candidate.id,
-          isDefault: true,
-          deletedAt: null,
-        },
+        where: { ownerId: candidate.id, isDefault: true, deletedAt: null },
       });
       resumeId = defaultDoc?.id || null;
     }
 
-    // Calculate deterministic skill match
-    const jobSkillsForMatch = job.skills.map((js) => ({
-      id: js.skill.id,
-      name: js.skill.name,
-      isRequired: js.isRequired,
-      weight: js.weight,
-    }));
-    const candSkillsForMatch = candidate.skills.map((cs) => ({
-      id: cs.skill.id,
-      name: cs.skill.name,
-      level: cs.level,
-      years: cs.years,
-    }));
+    const { jobSkillsForMatch, candSkillsForMatch } = mapSkillsForMatching(job.skills, candidate.skills);
     const matchResult = calculateSkillMatch(jobSkillsForMatch, candSkillsForMatch);
 
     try {
-      const application = await this.prisma.$transaction(async (tx) => {
-        const app = await tx.application.create({
-          data: {
-            jobId: input.jobId,
-            candidateId: candidate.id,
-            resumeDocumentId: resumeId,
-            coverLetter: input.coverLetter,
-            status: ApplicationStatus.APPLIED,
-          },
-        });
-
-        // Record initial status history
-        await tx.applicationStatusHistory.create({
-          data: {
-            applicationId: app.id,
-            fromStatus: ApplicationStatus.APPLIED,
-            toStatus: ApplicationStatus.APPLIED,
-            changedById: userId,
-            reason: 'Application submitted by candidate',
-          },
-        });
-
-        // Store deterministic match score
-        await tx.matchScore.create({
-          data: {
-            applicationId: app.id,
-            score: matchResult.score,
-            breakdown: JSON.stringify(matchResult.breakdown),
-            modelVersion: matchResult.modelVersion,
-          },
-        });
-
-        return app;
-      });
+      const application = await this.prisma.$transaction((tx) =>
+        createApplicationInTx(tx, {
+          jobId: input.jobId,
+          candidateId: candidate.id,
+          userId,
+          resumeDocumentId: resumeId,
+          coverLetter: input.coverLetter,
+          matchScore: matchResult.score,
+          matchBreakdown: matchResult.breakdown,
+          modelVersion: matchResult.modelVersion,
+        })
+      );
 
       await this.auditService.log({
         actorId: userId,
@@ -164,28 +117,12 @@ export class ApplicationsService {
    * Candidate lists their own applications.
    */
   async getMyApplications(userId: string) {
-    const candidate = await this.prisma.candidateProfile.findUnique({
-      where: { userId },
-    });
-    if (!candidate) {
-      return [];
-    }
+    const candidate = await this.prisma.candidateProfile.findUnique({ where: { userId } });
+    if (!candidate) return [];
 
     return this.prisma.application.findMany({
       where: { candidateId: candidate.id },
-      include: {
-        job: {
-          include: { company: true },
-        },
-        resume: true,
-        history: {
-          orderBy: { changedAt: 'desc' },
-        },
-        interviews: {
-          orderBy: { scheduledAt: 'desc' },
-        },
-        matchScore: true,
-      },
+      include: CANDIDATE_APPLICATION_INCLUDE,
       orderBy: { appliedAt: 'desc' },
     });
   }
@@ -194,20 +131,14 @@ export class ApplicationsService {
    * Candidate withdraws their own application.
    */
   async withdraw(userId: string, applicationId: string) {
-    const candidate = await this.prisma.candidateProfile.findUnique({
-      where: { userId },
-    });
+    const candidate = await this.prisma.candidateProfile.findUnique({ where: { userId } });
     if (!candidate) {
       throw new NotFoundException('Candidate profile not found');
     }
 
     const application = await this.prisma.application.findFirst({
-      where: {
-        id: applicationId,
-        candidateId: candidate.id,
-      },
+      where: { id: applicationId, candidateId: candidate.id },
     });
-
     if (!application) {
       throw new NotFoundException('Application not found');
     }
@@ -217,7 +148,6 @@ export class ApplicationsService {
       ApplicationStatus.WITHDRAWN,
       Role.CANDIDATE
     );
-
     if (!transitionCheck.allowed) {
       throw new UnprocessableEntityException({
         code: 'INVALID_TRANSITION',
@@ -252,6 +182,14 @@ export class ApplicationsService {
     });
   }
 
+  private async getRecruiterCompanyId(recruiterId: string): Promise<string> {
+    const membership = await this.prisma.companyMember.findFirst({ where: { userId: recruiterId } });
+    if (!membership) {
+      throw new ForbiddenException('User is not associated with any company');
+    }
+    return membership.companyId;
+  }
+
   /**
    * Recruiter lists applications scoped to their company.
    * Defense-in-depth: Never leaks applications from other companies.
@@ -260,34 +198,17 @@ export class ApplicationsService {
     recruiterId: string,
     filters?: { jobId?: string; status?: ApplicationStatus }
   ) {
-    const membership = await this.prisma.companyMember.findFirst({
-      where: { userId: recruiterId },
-    });
-    if (!membership) {
-      throw new ForbiddenException('User is not associated with any company');
-    }
+    const companyId = await this.getRecruiterCompanyId(recruiterId);
 
     return this.prisma.application.findMany({
       where: {
         job: {
-          companyId: membership.companyId,
+          companyId,
           ...(filters?.jobId ? { id: filters.jobId } : {}),
         },
         ...(filters?.status ? { status: filters.status } : {}),
       },
-      include: {
-        job: { select: { id: true, title: true, location: true } },
-        candidate: {
-          include: {
-            skills: { include: { skill: true } },
-          },
-        },
-        resume: true,
-        matchScore: true,
-        history: { orderBy: { changedAt: 'desc' } },
-        interviews: true,
-        _count: { select: { notes: true } },
-      },
+      include: RECRUITER_APPLICATIONS_INCLUDE,
       orderBy: { appliedAt: 'desc' },
     });
   }
@@ -297,47 +218,13 @@ export class ApplicationsService {
    * If application does not belong to recruiter's company, throws 404 (NOT 403) to prevent ID disclosure.
    */
   async findForRecruiter(recruiterId: string, applicationId: string) {
-    const membership = await this.prisma.companyMember.findFirst({
-      where: { userId: recruiterId },
-    });
-    if (!membership) {
-      throw new ForbiddenException('User is not associated with any company');
-    }
+    const companyId = await this.getRecruiterCompanyId(recruiterId);
 
     const application = await this.prisma.application.findFirst({
-      where: {
-        id: applicationId,
-        job: { companyId: membership.companyId },
-      },
-      include: {
-        job: {
-          include: {
-            skills: { include: { skill: true } },
-          },
-        },
-        candidate: {
-          include: {
-            skills: { include: { skill: true } },
-          },
-        },
-        resume: true,
-        history: {
-          include: { changedBy: { select: { email: true } } },
-          orderBy: { changedAt: 'desc' },
-        },
-        notes: {
-          include: { author: { select: { email: true } } },
-          orderBy: { createdAt: 'desc' },
-        },
-        interviews: {
-          orderBy: { scheduledAt: 'desc' },
-        },
-        matchScore: true,
-      },
+      where: { id: applicationId, job: { companyId } },
+      include: RECRUITER_APPLICATION_DETAIL_INCLUDE,
     });
-
     if (!application) {
-      // Return 404 Not Found to prevent ID enumeration across tenants
       throw new NotFoundException('Application not found');
     }
 
@@ -360,7 +247,6 @@ export class ApplicationsService {
       input.toStatus,
       Role.RECRUITER
     );
-
     if (!transitionCheck.allowed) {
       throw new UnprocessableEntityException({
         code: 'INVALID_TRANSITION',
@@ -404,18 +290,14 @@ export class ApplicationsService {
   async addNote(recruiterId: string, applicationId: string, input: ApplicationNoteInput) {
     await this.findForRecruiter(recruiterId, applicationId);
 
-    const note = await this.prisma.applicationNote.create({
+    return this.prisma.applicationNote.create({
       data: {
         applicationId,
         authorId: recruiterId,
         body: input.body,
       },
-      include: {
-        author: { select: { email: true } },
-      },
+      include: { author: { select: { email: true } } },
     });
-
-    return note;
   }
 
   /**

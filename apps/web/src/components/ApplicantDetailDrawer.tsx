@@ -1,85 +1,16 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  X,
-  FileText,
-  Download,
-  Calendar,
-  Clock,
-  Sparkles,
-  CheckCircle,
-  MessageSquare,
-  History,
-  ShieldCheck,
-  Send,
-  User,
-  ArrowRight,
-  ChevronRight,
-  Briefcase,
-  MapPin,
-  Mail,
-  Award,
-  Zap,
-} from 'lucide-react';
+import { X, FileText, Download, Calendar, User, MapPin, Zap } from 'lucide-react';
 import { fetchApi } from '../lib/api';
 import { InterviewModal } from './InterviewModal';
-
-const STATUS_LABELS: Record<string, string> = {
-  APPLIED: 'Ứng tuyển mới',
-  SCREENING: 'Sơ loại hồ sơ',
-  INTERVIEW: 'Phỏng vấn',
-  OFFER: 'Đề nghị nhận việc',
-  HIRED: 'Đã tuyển dụng',
-  REJECTED: 'Từ chối',
-  WITHDRAWN: 'Ứng viên đã rút đơn',
-};
-
-const NEXT_ALLOWED: Record<string, string[]> = {
-  APPLIED: ['SCREENING', 'REJECTED'],
-  SCREENING: ['INTERVIEW', 'REJECTED'],
-  INTERVIEW: ['INTERVIEW', 'OFFER', 'REJECTED'],
-  OFFER: ['HIRED', 'REJECTED'],
-  HIRED: [],
-  REJECTED: [],
-  WITHDRAWN: [],
-};
-
-interface NoteItem {
-  id: string;
-  body: string;
-  author?: { fullName?: string; email?: string };
-  createdAt: string;
-}
-
-interface HistoryItem {
-  id?: string;
-  toStatus: string;
-  fromStatus?: string;
-  reason?: string;
-  createdAt: string;
-  actor?: { fullName?: string; email?: string };
-}
-
-interface ApplicantCandidate {
-  fullName: string;
-  headline?: string | null;
-  location?: string | null;
-  yearsExperience?: number | null;
-  summary?: string | null;
-}
-
-interface ApplicantDetail {
-  id: string;
-  status: string;
-  candidate: ApplicantCandidate;
-  job?: {
-    id?: string;
-    title: string;
-  };
-  notes?: NoteItem[];
-  history?: HistoryItem[];
-}
+import {
+  STATUS_LABELS,
+  NEXT_ALLOWED,
+  type ApplicantDetail,
+} from './applicant-drawer/applicantDrawerConstants';
+import { ApplicantNotesSection } from './applicant-drawer/ApplicantNotesSection';
+import { ApplicantTimelineSection } from './applicant-drawer/ApplicantTimelineSection';
 
 export function ApplicantDetailDrawer({
   applicationId,
@@ -96,16 +27,13 @@ export function ApplicantDetailDrawer({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Transition state
   const [selectedNextStatus, setSelectedNextStatus] = useState('');
   const [transitionReason, setTransitionReason] = useState('');
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Note state
   const [noteBody, setNoteBody] = useState('');
   const [isAddingNote, setIsAddingNote] = useState(false);
 
-  // Interview modal
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
 
   const loadData = useCallback(() => {
@@ -116,11 +44,7 @@ export function ApplicantDetailDrawer({
       .then((data) => {
         setApp(data);
         const allowed = NEXT_ALLOWED[data.status] || [];
-        if (allowed.length > 0) {
-          setSelectedNextStatus(allowed[0]);
-        } else {
-          setSelectedNextStatus('');
-        }
+        setSelectedNextStatus(allowed.length > 0 ? allowed[0] : '');
       })
       .catch((err) => {
         setError((err as { detail?: string })?.detail || 'Không thể tải chi tiết ứng viên (Lỗi truy cập)');
@@ -266,7 +190,6 @@ export function ApplicantDetailDrawer({
                     </p>
                   )}
 
-                  {/* Resume Download Action */}
                   <div className="mt-4 pt-3.5 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between">
                     <span className="text-xs text-slate-500 font-medium flex items-center">
                       <FileText className="w-4 h-4 mr-1.5 text-blue-500" />
@@ -341,93 +264,21 @@ export function ApplicantDetailDrawer({
                   )}
                 </div>
 
-                {/* Internal Recruiter Notes */}
-                <div className="p-5 rounded-2xl glass-card space-y-4">
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center space-x-2">
-                    <MessageSquare className="w-4 h-4 text-blue-500" />
-                    <span>Ghi chú nội bộ Hội đồng tuyển dụng ({app.notes?.length || 0})</span>
-                  </h3>
+                <ApplicantNotesSection
+                  notes={app.notes}
+                  noteBody={noteBody}
+                  isAddingNote={isAddingNote}
+                  onNoteBodyChange={setNoteBody}
+                  onAddNote={handleAddNote}
+                />
 
-                  <form onSubmit={handleAddNote} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={noteBody}
-                      onChange={(e) => setNoteBody(e.target.value)}
-                      placeholder="Thêm nhận xét kỹ thuật, kết quả trao đổi..."
-                      className="flex-1 text-xs rounded-xl border border-slate-300 dark:border-white/[0.15] bg-white dark:bg-slate-900 p-2.5 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      type="submit"
-                      disabled={isAddingNote}
-                      className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-950 hover:bg-slate-800 transition shrink-0"
-                    >
-                      {isAddingNote ? 'Lưu...' : 'Gửi'}
-                    </button>
-                  </form>
-
-                  <div className="space-y-2.5 max-h-48 overflow-y-auto">
-                    {app.notes?.map((n: NoteItem) => (
-                      <div
-                        key={n.id}
-                        className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.06] text-xs"
-                      >
-                        <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono mb-1">
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">
-                            {n.author?.fullName || n.author?.email}
-                          </span>
-                          <span>{new Date(n.createdAt).toLocaleString('vi-VN')}</span>
-                        </div>
-                        <p className="text-slate-800 dark:text-slate-200 leading-relaxed">
-                          {n.body}
-                        </p>
-                      </div>
-                    ))}
-                    {(!app.notes || app.notes.length === 0) && (
-                      <p className="text-xs text-slate-400 italic text-center py-2">
-                        Chưa có ghi chú nào cho ứng viên này.
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Audit Timeline History */}
-                <div className="p-5 rounded-2xl glass-card space-y-3.5">
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center space-x-2">
-                    <History className="w-4 h-4 text-slate-400" />
-                    <span>Lịch sử luồng trạng thái ứng tuyển (Audit Trail)</span>
-                  </h3>
-
-                  <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-white/[0.1]">
-                    {app.history?.map((h: HistoryItem, idx: number) => (
-                      <div key={h.id || idx} className="relative text-xs">
-                        <span className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-white dark:ring-slate-900" />
-                        <div className="font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-                          <span>{STATUS_LABELS[h.toStatus] || h.toStatus}</span>
-                          {h.fromStatus && (
-                            <span className="text-[10px] text-slate-400 font-mono">
-                              (từ {STATUS_LABELS[h.fromStatus] || h.fromStatus})
-                            </span>
-                          )}
-                        </div>
-                        {h.reason && (
-                          <p className="text-slate-600 dark:text-slate-400 mt-0.5 italic">
-                            Lý do: {h.reason}
-                          </p>
-                        )}
-                        <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
-                          {new Date(h.createdAt).toLocaleString('vi-VN')} • bởi {h.actor?.fullName || h.actor?.email || 'Hệ thống'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <ApplicantTimelineSection history={app.history} />
               </>
             ) : null}
           </div>
         </div>
       </div>
 
-      {/* Schedule Interview Modal */}
       {isInterviewModalOpen && app && (
         <InterviewModal
           applicationId={app.id}
